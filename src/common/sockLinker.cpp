@@ -3,7 +3,7 @@
 using namespace std;
 
 //非阻塞recv
-int SockLinker::trecv(int fd, void *buff, size_t n, timeval *timeout) {
+/*int SockLinker::trecv(int fd, void *buff, size_t n, timeval *timeout) {
 	int RecvSize = 0;
 	fd_set wset;
 	while(n-RecvSize > 0) {
@@ -38,7 +38,7 @@ int SockLinker::tread(int fd, void *buff, size_t n, timeval *timeout) {
 	}
 	((char *)buff)[ret] = '\0';
 	return ret;
-}
+}*/
 
 int SockLinker::generateHttpHeader(std::string& res, int len) {
 	char buf[HTTP_HEADER_MAX_LENGTH];
@@ -191,7 +191,7 @@ int SockLinker::doWork() {
 	printf("doWork\n");
 	while(1) {
 		memset(recvBuff,'\0',buffer_size);
-		recvNum = trecv(sockfd, recvBuff, buffer_size, NULL);
+		recvNum = ::recv(sockfd, recvBuff, buffer_size, NULL);
 		if(recvNum < 0) {
 			if(errno == ECONNRESET || errno==ETIMEDOUT) {//ETIMEDOUT可能导致SIGPIPE 
 				close(sockfd);

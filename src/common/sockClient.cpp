@@ -80,6 +80,7 @@ bool SocketClient::send(const std::string &data) {
 	return true;
 }
 
+/*
 int SocketClient::trecv(int fd, void *buff, size_t n, timeval *timeout) {
 	bzero(m_buffer, MAXLENGTH);
 	int left = n;
@@ -99,7 +100,7 @@ int SocketClient::trecv(int fd, void *buff, size_t n, timeval *timeout) {
 		left -= ret;
 	}
 	return n;
-}
+}*/
 
 bool SocketClient::recv() {
 	std::cerr << "recv ..." << std::endl;
@@ -137,7 +138,7 @@ bool SocketClient::close() {
 
 
 //非阻塞read
-int SocketClient::tread(int fd, void *buff, size_t n, timeval *timeout) {
+/*int SocketClient::tread(int fd, void *buff, size_t n, timeval *timeout) {
 	fd_set rset;
 	FD_ZERO(&rset);
 	FD_SET(fd, &rset);
@@ -151,6 +152,6 @@ int SocketClient::tread(int fd, void *buff, size_t n, timeval *timeout) {
 	}
 	((char *)buff)[ret] = '\0';
 	return ret;
-}
+}*/
 
 }
