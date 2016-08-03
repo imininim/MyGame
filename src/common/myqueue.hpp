@@ -1,7 +1,6 @@
 #ifndef __MYQUEUE__
 #define __MYQUEUE__
 
-#include <thread>
 #include <iostream>
 
 

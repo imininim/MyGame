@@ -1,6 +1,4 @@
 #include "mythreadpool.h"
-#include <thread>
-#include <functional>
 
 using namespace std;
 /*
@@ -53,26 +51,32 @@ bool MyThreadpool::start() {
 	}
 	m_threads.resize(m_thread_num);
 	m_running = true;
+	pthread_t thd;
 	for(int i = 0; i < m_thread_num; i ++) {
-		std::thread *pthread = new thread(std::bind(&MyThreadpool::run, this));
-		m_threads[i] = pthread;
+		//++++++
+		pthread_create(&thd, NULL, MyThreadpool::run, this);
+		//std::thread *pthread = new thread(std::bind(&MyThreadpool::run, this));
+		m_threads[i] = thd;
 	}
 	cout << "thread start!" << endl;
 	return true;
 }
 
-void MyThreadpool::run() {
+void* MyThreadpool::run(void *args) {
 	Worker *work;
-	while(m_running && m_taskqueue.get(work)) {
+	MyThreadpool *pool = (MyThreadpool *)args;
+	while(pool->m_running && pool->m_taskqueue.get(work)) {
 		work->doWork();
 	}
 }
 
 void MyThreadpool::waitforstop() {
-	for(auto it = m_threads.begin(); it != m_threads.end(); it ++) {
-		thread *pthread = *it;
-		pthread->join();
-		delete pthread;
+	for(int i = 0; i < m_threads.size(); i ++) {
+		//pthread_kill(m_thread[i], SIGTERM);
+		pthread_join(m_threads[i], NULL);
+		//thread *pthread = *it;
+		//pthread->join();
+		//delete pthread;
 	}
 	m_threads.clear();
 }

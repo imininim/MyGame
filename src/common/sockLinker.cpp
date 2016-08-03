@@ -150,8 +150,8 @@ int SockLinker::URLEncode(const char *input, int len, char *output, int &outlen)
 	return 0;
 }
 
-SOCKETTYPE SockLinker::CheckMSG(const char buff[], int len, const char* &output, int &outlen) {
-	SOCKETTYPE type = SOCKETTYPE::OTHER;
+int SockLinker::CheckMSG(const char buff[], int len, const char* &output, int &outlen) {
+	int type = 0;
 	output = buff;
 	outlen = len;
 	const char *pos = strstr(buff, "\r\n\r\n");
@@ -164,7 +164,7 @@ SOCKETTYPE SockLinker::CheckMSG(const char buff[], int len, const char* &output,
 			if(GetPosEnd!=NULL && GetPosEnd<pos) {
 				output = GetPos+3;
 				outlen = GetPosEnd - GetPos - 3;
-				type = SOCKETTYPE::HTTPGET;
+				type = 1;
 			}
 		}
 		const char *PostPos = strstr(buff, "POST");
@@ -174,7 +174,7 @@ SOCKETTYPE SockLinker::CheckMSG(const char buff[], int len, const char* &output,
 			if(PostPosEnd == NULL) {
 				output = PostPos+4;
 				outlen = len - (PostPos - buff - 4);
-				type = SOCKETTYPE::HTTPPOST;
+				type = 2;
 			}
 		}
 	}
@@ -211,7 +211,7 @@ int SockLinker::doWork() {
 
 	const char *MSG;
 	int MSGLen = 0;
-	SOCKETTYPE type = CheckMSG(recvBuff, recvNum, MSG, MSGLen);
+	int type = CheckMSG(recvBuff, recvNum, MSG, MSGLen);
 
 	cout << "LEN = " << MSGLen << endl;
 	for(int i = 0; i < MSGLen; ++ i) {
@@ -219,17 +219,17 @@ int SockLinker::doWork() {
 	}
 	cout << endl;
 
-	if(type == SOCKETTYPE::HTTPGET) {
+	if(type == 1) {
 		printf("GET\n");
 		char URL[3000];
 		int len;
 		URLDecode(MSG, MSGLen, URL, len);
 		cout << URL << endl;
 	}
-	else if(type == SOCKETTYPE::HTTPPOST) {
+	else if(type == 2) {
 		printf("POST\n");
 	}
-	else if(type == SOCKETTYPE::OTHER) {
+	else if(type == 0) {
 		printf("OTHER\n");
 	}
 	//printf("message: %s \n", recvBuff); 

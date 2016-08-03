@@ -2,10 +2,7 @@
 #define __MYTHREADPOOL__
 
 #include "myqueue.hpp"
-#include <thread>
 #include <vector>
-#include <mutex>
-#include <condition_variable>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>  
@@ -17,6 +14,8 @@
 #include <unistd.h>
 #include <fstream>
 #include <string.h>
+#include <pthread.h>
+#include <iostream>
 
 namespace COMMON {
 
@@ -35,12 +34,19 @@ public:
 	MyTaskQueue():m_size(0), m_alive(true) {
 		m_head._next = &m_head;
 		m_head._pre = &m_head;
+		pthread_mutex_init(&m_mutex, NULL);
+		pthread_cond_init(&m_cond, NULL);
+	}
+	~MyTaskQueue() {
+		pthread_cond_destroy(&m_cond);
+		pthread_mutex_destroy(&m_mutex);
 	}
 	void put(const T &v) {
 		//printf("PUT\n");
 		link_node<T> *tmp = new link_node<T>();
 		tmp->_value = v;
-		std::unique_lock<std::mutex> lck(m_mtx);
+		//std::unique_lock<std::mutex> lck(m_mtx);
+		pthread_mutex_lock(&m_mutex);
 		if(m_alive) {
 			tmp->_next = m_head._next;
 			(m_head._next)->_pre = tmp;
@@ -49,8 +55,10 @@ public:
 
 			m_size ++;
 		}
-		m_cond.notify_one();
-		lck.unlock();
+		pthread_cond_signal(&m_cond);
+		pthread_mutex_unlock(&m_mutex);
+		//m_cond.notify_one();
+		//lck.unlock();
 		//printf("PUT SUCCESS\n");
 	}
 	/*bool get(T *v) {
@@ -82,9 +90,11 @@ public:
 	bool get(T &v) {
 		//printf("GET\n");
 		link_node<T> *t;
-		std::unique_lock<std::mutex> lck(m_mtx);
+		//std::unique_lock<std::mutex> lck(m_mtx);
+		pthread_mutex_lock(&m_mutex);
 		while(m_alive && isempty()) {
-			m_cond.wait(lck);
+			//m_cond.wait(lck);
+			pthread_cond_wait(&m_cond, &m_mutex);
 		}
 		if(m_alive) {
 			t = m_head._pre;
@@ -96,11 +106,13 @@ public:
 			m_size --;
 		}
 		else {
-			t = nullptr;
+			//t = nullptr;
+			t = NULL;
 			return false;
 		}
-		lck.unlock();
-		if(t != nullptr) {
+		pthread_mutex_unlock(&m_mutex);
+		//lck.unlock();
+		if(t != NULL) {
 			delete t;
 		}
 		//printf("GET SUCCESS\n");
@@ -114,16 +126,22 @@ public:
 	}
 
 	void stop() {
-		std::unique_lock<std::mutex> lck(m_mtx);
+		pthread_mutex_lock(&m_mutex);
 		m_alive = false;
-		m_cond.notify_all();
+		pthread_cond_broadcast(&m_cond);
+		pthread_mutex_unlock(&m_mutex);
+		//std::unique_lock<std::mutex> lck(m_mtx);
+		//m_alive = false;
+		//m_cond.notify_all();
 	}
 private:
 	link_node<T> m_head;
 	int m_size;
 	bool m_alive;
-	std::mutex m_mtx;
-	std::condition_variable m_cond;
+	pthread_mutex_t m_mutex;
+	pthread_cond_t m_cond;
+	//std::mutex m_mtx;
+	//std::condition_variable m_cond;
 };
 
 
@@ -157,7 +175,7 @@ private:
 public:
 	void sendfile() {
 		//write();
-		std::ifstream fin;
+		/*std::ifstream fin;
 		fin.open(m_path, std::ios::binary);
 
 		char buf[MAXLENGTH];
@@ -174,7 +192,7 @@ public:
 		std::cerr << "fread ok" << std::endl;
 		//传输
 		std::cerr << "recv ok" << std::endl;
-		::close(m_fd);
+		::close(m_fd);*/
 	}
 };
 
@@ -191,11 +209,11 @@ public:
 	void exit();
 
 private:
-	void run();
+	static void* run(void *);
 	void waitforstop();
 
 private:
-	std::vector<std::thread *> m_threads;
+	std::vector<pthread_t> m_threads;
 	int m_thread_num;
 	volatile bool m_running;
 public:

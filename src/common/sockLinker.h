@@ -20,12 +20,18 @@
 #include "common/mythreadpool.h"
 #include "common/define.h"
 
+enum SOCKETTYPE {
+OTHER=0,
+HTTPGET=1,
+HTTPPOST=2
+};
+
 class SockLinker:public COMMON::Worker {
 public:
 	virtual int doWork();
 private:
 	//判断请求类型
-	SOCKETTYPE CheckMSG(const char buff[], int len, const char* &output, int &outlen);
+	int CheckMSG(const char buff[], int len, const char* &output, int &outlen);
 	//获取Get请求
 	int HttpGetMSG();
 	//获取Post请求
