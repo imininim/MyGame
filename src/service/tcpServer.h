@@ -2,16 +2,24 @@
 #define TCPSERVER_H_
 #include "tcpInfo.h"
 #include<string>
+#include<map>
 #include<tr1/unordered_map>
 #include "time_wrap.h"
 struct event_base;
 
+
+
+
 class CTCPServer: public iServer
 {
+	struct cmp_bufferevent
+	{
+		bool operator()(const bufferevent* p1, const bufferevent* p2);
+	};
 
 public:
 	typedef std::tr1::unordered_map<int, iEventPtr>				EventMap;		//事件列表
-	typedef std::tr1::unordered_map<bufferevent*, iTCPHandlePtr>	ConnMap;		//连接列表
+	typedef std::map<bufferevent*, iTCPHandlePtr, cmp_bufferevent>	ConnMap;		//连接列表
 
 	CTCPServer(CFrame* p, const char* pszName, short nPort);
 	virtual ~CTCPServer(void);

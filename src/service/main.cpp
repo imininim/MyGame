@@ -16,19 +16,7 @@ struct CMyFrame: public CFrame
 	//初始化
 	virtual bool Initialize(void)
 	{ 
-		static char buf[]= "hello signal!";
-		static char buf1[] = "hello Timer 1";
-		static char buf3[] = "hello Timer 3";
-
-		//m_pServer->AddSignal(20, (void*)buf); // ctrl-z 信号
-			
-	//	struct	timeval  ti = {1, 0};  //3秒一次的定时器
-	//	struct	timeval  ti2 = {3, 0};  //1秒一次的定时器
-	//	m_pServer->SetTimer(100, ti, (void*)buf1);
-	//	m_pServer->SetTimer(103, ti2, (void*)buf3);
-	
-	//设置死连接检测时间
-	m_pServer->SetDeadCheck(60*10);
+		
 		return true;
 	
 	}

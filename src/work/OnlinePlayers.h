@@ -24,7 +24,7 @@ public:
 	//登录 ok
 	int Login(const std::string &Account, const std::string &Passwd, const std::string &Name);
 	//退出 
-	int Logout(const std::string &Account);
+	int Logout(const std::string &Account, int &id);
 	//创建房间
 	int CreateTable(const std::string &Account, int &id, const int &planPlay, const int &retCard);
 	//销毁房间
@@ -63,7 +63,7 @@ public:
 		pthread_mutex_destroy(&m_mutex);
 	}
 private:
-	int Register_Unlock(const std::string &Account, const std::string &Passwd, const std::string &Name);
+	int Register_Unlock(const std::string &Account, const std::string &Passwd, const std::string Name);
 	OnlinePlayers(const std::string &db_addr, const std::string &db_user, const std::string &db_passwd, const std::string &db_name):
 	m_mysql(db_addr, db_user, db_passwd, db_name) {
 		m_mysql.initConnection();

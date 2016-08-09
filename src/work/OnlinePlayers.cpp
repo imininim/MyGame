@@ -93,11 +93,13 @@ int OnlinePlayers::DestroyTable(int id) {
 		}
 
 		Table *table = m_onlineTableMap[id];
-		for(int i = 0; i < table->m_tablePlayer.size(); i ++) {
-			const std::string &account = table->m_tablePlayer[i].m_player->m_account;
-			std::tr1::unordered_map<std::string, Table*>::iterator it = m_Player2TableMap.find(account);
-			if(it != m_Player2TableMap.end()) {
-				m_Player2TableMap.erase(it);
+		for(int i = 0; i < 4; i ++) {
+			if(table->m_status[i]) {
+				const std::string &account = table->m_tablePlayers[i].m_player->m_account;
+				std::tr1::unordered_map<std::string, Table*>::iterator it = m_Player2TableMap.find(account);
+				if(it != m_Player2TableMap.end()) {
+					m_Player2TableMap.erase(it);
+				}
 			}
 		}
 
@@ -110,11 +112,10 @@ int OnlinePlayers::DestroyTable(int id) {
 	return ret;
 }
 
-int OnlinePlayers::Register_Unlock(const std::string &Account, const std::string &Passwd, const std::string &Name) {
-	//std::unique_lock<std::mutex> lck(m_mtx);
+int OnlinePlayers::Register_Unlock(const std::string &Account, const std::string &Passwd, const std::string Name) {
+	//std::unique_lock<std::mutex> lck(m_mtx);	
 	int ret = 0;
 	do {
-
 		std::string sql = "select account, passwd from Player where account='"+Account+"' and passwd='"+Passwd+"';";
 		std::vector<std::vector<std::string> > result;
 		if(m_mysql.select(sql, result) == -1) {
@@ -128,8 +129,26 @@ int OnlinePlayers::Register_Unlock(const std::string &Account, const std::string
 			break;
 		}
 
-		//sql = "insert into Player(account, passwd, name, roomCard) value ('"+Account+"', '"+Passwd+"', '"+Name+"', 100);";
-		sql = "insert into Player(account, passwd, name, roomCard) value ('"+Account+"', '"+Passwd+"', 'yangshu', 100);";
+		std::string sql1 = "insert into Player(account, passwd, name, roomCard) value ('"+Account+"', '"+Passwd+"', '"+Name+"', 100);";
+		sql =              "insert into Player(account, passwd, name, roomCard) value ('"+Account+"', '"+Passwd+"', 'yangshu', 100);";
+		if(sql1 != sql) {
+			LOG_DEBUG("*********** Name length = %d   %s", Name.length(), Name.c_str());
+			for (std::string::const_iterator it = Name.begin(); it != Name.end(); ++it)
+			{
+				LOG_DEBUG("** %d", *it);
+			}
+			
+			std::string test1 = "!"+Name+"!";
+			
+			
+			std::string test2 = "!yangshu!";
+			LOG_DEBUG("*********** test1 length = %u   %s", test1.size(), test1.c_str());
+			LOG_DEBUG("*********** test2 length = %d   %s", test2.length(), test2.c_str());
+			LOG_DEBUG("*********** Name length = %d", Name.length());
+			LOG_DEBUG("*********** sql length = %d    %s", sql.length(), sql.c_str());
+			LOG_DEBUG("*********** sql1 length = %d   %s", sql1.length(), sql1.c_str());
+			LOG_DEBUG("*********** sql no equal");
+		}
 		//std::cerr << m_mysql.insert(sql) << std::endl;
 		if(m_mysql.insert(sql) == -1) {
 			LOG_DEBUG("insert error");
@@ -224,6 +243,37 @@ int OnlinePlayers::Clear() {
 	m_onlineTableMap.clear();
 	m_Player2TableMap.clear();
 	return 0;
+}
+
+int OnlinePlayers::Logout(const std::string &Account, int &id) {
+	int ret = -1;
+	pthread_mutex_lock(&m_mutex);
+	do {
+		if(m_onlinePlayMap.find(Account) == m_onlinePlayMap.end()) {
+			LOG_ALERT("%s uid error", Account.c_str());
+			break;
+		}
+		const Player *player = m_onlinePlayMap[Account];
+		if(player == NULL) {
+			break;
+		}
+		Table *table = m_Player2TableMap[Account];
+		if(table != NULL) {
+			id = table->m_id;
+			table->OutRoom(player);
+		}
+		std::tr1::unordered_map<std::string, Table*>::iterator it = m_Player2TableMap.find(Account);
+		if(it != m_Player2TableMap.end()) {
+			m_Player2TableMap.erase(it);
+		}
+		std::tr1::unordered_map<std::string, const Player*>::iterator pit = m_onlinePlayMap.find(Account);
+		if(pit != m_onlinePlayMap.end()) {
+			m_onlinePlayMap.erase(pit);
+		}
+		ret = 0;
+	} while(0);
+	pthread_mutex_unlock(&m_mutex);
+	return ret;
 }
 
 int OnlinePlayers::show() const {

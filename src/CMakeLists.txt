@@ -1,4 +1,4 @@
-INCLUDE_DIRECTORIES(/root/qutianhao/MyGame/src)
+INCLUDE_DIRECTORIES(/root/yangshugit/MyGame/src)
 link_directories(/usr/lib64/mysql)
 #add_definitions("-std=c++11")
 #include_directories(/usr/lib64/mysql)
@@ -28,7 +28,7 @@ SET(SRC_LIST main.cpp
 	work/Table.cpp
 	work/TablePlayer.cpp
 	work/Resp.h
-
+	work/CalScore.h
 #	common/myMempool.cpp
 #	common/sockClient.cpp
 #	common/myalgorithm.cpp

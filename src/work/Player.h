@@ -14,6 +14,10 @@ public:
 	int GetRoomCard() const {
 		return m_roomCard;
 	}
+	int subRoomCard(int idx) {
+		m_roomCard -= idx;
+		return 0;
+	}
 public:
 	std::string m_account;
 	std::string m_name;

@@ -26,37 +26,54 @@
 }*/
 
 //游戏模块
-/*int Game::Play(const std::string &uid, const std::string &commands, std::vector<Resp> &resp) {
+int Game::PlayGame(const std::string &uid, const std::string &commands, std::vector<Resp> &resp) {
 	int ret = -1;
 	do {
-		int pos = commands.find(":");
-		if(pos == std::string::npos) {
-			break;
+		int type = 0;
+		std::vector<std::string> Info;
+		COMMON::sepString(commands, "|", Info);
+		int card = -1, card2 = -1, card3 = -1;
+		if(Info.size() >= 4) {
+			card3 = COMMON::convert<std::string, int>(Info[3]);
 		}
-		std::string command = commands.substr(pos+1);
-		pos = command.find(":");
-		if(pos == std::string::npos) {
-			break;
+		if(Info.size() >= 3) {
+			card2 = COMMON::convert<std::string, int>(Info[2]);
 		}
-		std::string Card = command.substr(pos+1);
-		std::string type = command.substr(0, pos);
-		pos = Card.find("|");
-		int card = -1, card2 = -1;
-		if(pos == std::string::npos) {
-			card = COMMON::convert<std::string, int>(Card);
+		if(Info.size() >= 2) {
+			card = COMMON::convert<std::string, int>(Info[1]);
 		}
-		else {
-			card = COMMON::convert<std::string, int>(Card.substr(0,pos));
-			card2 = COMMON::convert<std::string, int>(Card.substr(pos+1));
+		if(Info[0] == "th") {
+			type |= 1;
 		}
+		else if(Info[0] == "chi") {
+			type |= 2;
+		}
+		else if(Info[0] == "peng") {
+			type |= 4;
+		}
+		else if(Info[0] == "gang") {
+			type |= 8;
+		}
+		else if(Info[0] == "hu") {
+			type |= 16;
+		}
+		else if(Info[0] == "dapai") {
+			type |= 32;
+		}
+		else if(Info[0] == "guo") {
+			type |= 64;
+		}
+		else if(Info[0] == "guaji") {
+			type |= 128;
+		}
+		
 		OnlinePlayers *onlinePlayer = OnlinePlayers::getOnlinePlayers();
 		Table *table = onlinePlayer->GetTable(uid);
-		const Player *player = onlinePlayer->GetPlayer(uid);
-		table->PlayerOperator(player, type, card, card2);
+		table->PlayerOperator(uid, type, card, card2, card3, resp);
 		ret = 0;
 	} while(0);
 	
-	std::tr1::unordered_map<std::string, std::string> playersOp;
+	/*std::tr1::unordered_map<std::string, std::string> playersOp;
 	
 	do {
 		OnlinePlayers *onlinePlayer = OnlinePlayers::getOnlinePlayers();
@@ -69,14 +86,18 @@
 			res.m_resp = it->second;
 			resp.push_back(res);
 		}
-	}while(0);
+	}while(0);*/
 	
 	return 0;
-}*/
+}
 
 int Game::Begin(const std::string &uid, const std::string &commands, std::vector<Resp> &resp) {
 	OnlinePlayers *onlinePlayer = OnlinePlayers::getOnlinePlayers();
 	Table *table = onlinePlayer->GetTable(uid);
+	if(table == NULL) {
+		LOG_ERROR("table id error:%s", uid.c_str());
+		return -1;
+	}
 	if(table->BeginGame()) {
 		return -1;
 	}
@@ -85,16 +106,14 @@ int Game::Begin(const std::string &uid, const std::string &commands, std::vector
 	for(int i = 0; i < 4; i ++) {
 		table->GetAllCards(i, res.m_uid, res.m_resp);
 		resp.push_back(res);
-	}	
-	/*std::tr1::unordered_map<std::string, std::string> playersOp;
-	table->toClient(playersOp);
-	std::tr1::unordered_map<std::string, std::string>::iterator it = playersOp.begin();
-	Resp res;
-	for(; it != playersOp.end(); it ++) {
-		res.m_uid = it->first;
-		res.m_resp = it->second;
-		resp.push_back(res);
-	}*/
+	}
+
+	table->PlayerOperator(uid, MOPAI, 0, 0, 0, resp);
+
+	for(int i = 0; i < 4; i ++) {
+		table->GetAllCards(i, res.m_uid, res.m_resp);
+		std::cerr << "card: " << res.m_resp << std::endl;
+	}
 	return 0;
 }
 
@@ -201,7 +220,6 @@ int Game::CreateTable(const std::string &uid, const std::string &commands, std::
 		COMMON::sepString(commands, "|", Info);
 		OnlinePlayers *onlinePlayer = OnlinePlayers::getOnlinePlayers();
 		const Player *player = onlinePlayer->GetPlayer(uid);
-
 		if(onlinePlayer->CreateTable(uid, id, COMMON::convert<std::string, int>(Info[0]), COMMON::convert<std::string, int>(Info[1])) == -1) {
 			break;
 		}
@@ -251,16 +269,17 @@ int Game::doGame(std::string &uid, const std::string &commands, std::vector<Resp
 	else if(Opt == "outroom") {
 		Game::OutRoom(uid, command, resp);
 	}
-	else if(commands.find("begin") != std::string::npos) {
-		Game::Begin(uid, commands, resp);	//开始游戏
+	else if(commands.find("startgame") != std::string::npos) {
+		Game::Begin(uid, command, resp);	//开始游戏
+	}
+	else if(commands.find("game") != std::string::npos) {
+		Game::PlayGame(uid, command, resp);	//玩游戏
 	}
 	/*else if(commands.find("end") != std::string::npos) {
 		//Game::End();	//结束游戏
 	}
 	
-	else if(commands.find("play") != std::string::npos) {
-		Game::PlayGame(uid, commands, resp);	//玩游戏
-	}
+	
 	else if(commands.find("speek") != std::string::npos) {
 
 	}*/
@@ -309,6 +328,7 @@ int Game::Login(std::string &uid, const std::string &commands, std::vector<Resp>
 	int ret = -1;
 	Resp res;
 	do {
+		LOG_ALERT("将消息打印出来: %s,  %u", commands.c_str(), commands.size());
 		std::vector<std::string> Info;
 		COMMON::sepString(commands, "|", Info);
 		if(Info.size() != 2) {
@@ -340,6 +360,45 @@ int Game::Login(std::string &uid, const std::string &commands, std::vector<Resp>
 }
 
 int Game::Logout(const std::string &uid, const std::string &commands, std::vector<Resp> &resp) {
+	int ret = -1;
+	int id = -1;
+	do {
+		OnlinePlayers *onlinePlayer = OnlinePlayers::getOnlinePlayers();
+		if(onlinePlayer->Logout(uid, id) == -1) {
+			break;
+		}
+		ret = 0;
+	} while(0);
 
-	return 0;
+	Resp res;
+	do {
+		if(ret == -1) {
+			break;
+		}
+		OnlinePlayers *onlinePlayer = OnlinePlayers::getOnlinePlayers();
+		Table *table = onlinePlayer->GetTable(id);
+		if(table == NULL) {
+			ret = -1;
+			break;
+		}
+		for(int i = 0; i < 4; i ++) {
+			if(table->toResp(i, res.m_uid, res.m_resp) != -1) {
+				resp.push_back(res);
+			}
+		}
+		if(table->m_roomMan == 0) {
+			if(GameConfig::debug > 1) {
+				std::cerr << "DestroyTable:" << table->m_id << std::endl;
+			}
+			onlinePlayer->DestroyTable(id);
+			id = -1;
+		}
+	} while(0);
+	if(ret == -1) {
+		res.m_resp = "outroom:no";
+		res.m_uid = uid;
+		resp.push_back(res);
+	}
+
+	return ret;
 }

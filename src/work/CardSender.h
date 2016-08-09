@@ -10,15 +10,18 @@ public:
 	virtual Pai getCard()=0;
 	virtual int init()=0;
 	virtual bool isLastOne()=0;
+	virtual bool isNull()=0;
 };
 
 //发牌器
 class CardSenderA:public CardSender {
 public:
 	int m_p;	//当前在什么位置
+	int m_retCard;	//扎马数
 	Pai *m_card;	//麻将
 public:
-	CardSenderA() {
+	CardSenderA(int retCard) {
+		m_retCard = retCard;
 		m_card = new Pai[30];
 	}
 	~CardSenderA() {
@@ -29,6 +32,7 @@ public:
 		for(int i = 0; i < 30; i ++) {
 			m_card[i] = 4;
 		}
+		m_p -= m_retCard;
 		m_p = 128;
 	}
 	virtual Pai getCard() {
@@ -39,6 +43,10 @@ public:
 		}
 		m_card[pai] --;
 		m_p --;
+		return pai;
+	}
+	virtual bool isNull() {
+		return (m_p==0);
 	}
 	virtual bool isLastOne() {
 		if(m_p == 1) {

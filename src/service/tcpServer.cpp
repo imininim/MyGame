@@ -258,7 +258,6 @@ const char* CTCPServer::GetSvcName() const
 
 void CTCPServer::OnRecv( struct bufferevent *bev, void *ctx )
 {
-	//每一次有数据可读，都是把数据一次性读出来，  以后会加入缓存
 	iTCPHandlePtr pConn = *(iTCPHandlePtr*)ctx;
 	CTCPServer* pServer = (CTCPServer*)((CTCPHandle*)GetImplRef(pConn))->GetTCPServer();
 	((CTCPHandle*)GetImplRef(pConn))->SetDeadTime(pServer->m_qtime);
@@ -313,15 +312,6 @@ CFrame* CTCPServer::GetFrame( void )
 	return m_pFrame;
 }
 
-//iServer::EventMap& CTCPServer::GetEvents( void )
-//{
-//	return m_mapEvent;
-//}
-//
-//iServer::ConnMap& CTCPServer::GetConns( void )
-//{
-//	return m_mapHandles;
-//}
 
 void CTCPServer::doResetConnectEvent( iTCPHandlePtr& pHandle, iServer* pServer, struct bufferevent *bev, short events)
 {
@@ -420,21 +410,22 @@ void CTCPServer::doResetConnectEvent( iTCPHandlePtr& pHandle, iServer* pServer, 
 	ConnMap::iterator it = m_mapHandles.begin();
 	std::advance(it, m_deadcheck.pos()); // pos 之前的都已经检查过了
 
+
 	//遍历一段链接， 检测是否是活跃的链接
 	for (int i = 0; (it != m_mapHandles.end()) && (i < checkNum); ++i)
 	{
 		iTCPHandlePtr& pHandle = it->second;
 		const CTCPHandle* p = (CTCPHandle*)(GetImplRef(pHandle));
-		//LOG_DEBUG("连接生存时间:%lu, 服务器生存时间: %lu, 总的检测间隔:%lu", p->GetDeadTime().sec(), m_qtime.sec(), m_deadcheck.total_time_sec());
+		//LOG_DEBUG("连接生存时间:%lu, 服务器生存时间: %lu, 总的检测间隔:%lu, start= %u", p->GetDeadTime().sec(), m_qtime.sec(), m_deadcheck.total_time_sec(), m_deadcheck.pos());
 
 		if ( (p->GetDeadTime().sec() +  m_deadcheck.total_time_sec())  < m_qtime.sec() )
 		{
-			//此链接超过一定时间没有接收/发送 消息， 判定其为不活跃的链接
+			//此链接超过一定时间没有接收 消息， 判定其为不活跃的链接
 			m_pFrame->OnError(pHandle, socket_no_active, "the connection is not active or dead");
 
 			if (isUnique(pHandle)) //唯一连接,释放他
 			{
-				it = m_mapHandles.erase(it);
+				m_mapHandles.erase(it++);
 				continue;
 			}
 		}
@@ -444,7 +435,7 @@ void CTCPServer::doResetConnectEvent( iTCPHandlePtr& pHandle, iServer* pServer, 
  } 
 
 
-
-
-
-
+ bool CTCPServer::cmp_bufferevent::operator()( const bufferevent* p1, const bufferevent* p2 )
+ {
+		return (int)bufferevent_getfd(const_cast<bufferevent*>(p1)) < (int)bufferevent_getfd(const_cast<bufferevent*>(p2));
+ }

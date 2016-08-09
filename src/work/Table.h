@@ -4,13 +4,15 @@
 #include <string>
 #include <vector>
 #include <tr1/unordered_map>
+#include <service/ServerFrame.h>
 
-
+#include "Resp.h"
 #include "Player.h"
 #include "define.h"
 #include "TablePlayer.h"
 #include "CardSender.h"
 #include "MJAlgorithm.h"
+#include "CalScore.h"
 
 //一桌游戏
 class Table {
@@ -32,16 +34,17 @@ public:
 	int m_people;		//人数
 	
 	int m_doingPlayer;	//正在执行操作的玩家
-	int prePlayer;		//上一个玩家
-	Pai prePai;			//上一张打出的牌
+	int m_prePlayer;		//上一个玩家
+	Pai m_prePai;			//上一张打出的牌
 	CardSender *m_cardSender;	//发牌器
 	GamePlayWay m_playGame;	//游戏玩法
+	CalScore m_calScore;
 public:
 	Table(const Player *player, const int type, const int &id, const int &planPlay, const int &retCard);
 	~Table();
 public:
 	//玩家uid进行了 type操作 出了 card牌
-	int PlayerOperator(const Player *player, const std::string &type, const int card, const int card2);
+	int PlayerOperator(const std::string &uid, const int &type, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
 	int BeginGame();
 	int GetPlayersID(std::string &players);
 	int GetPlayersAccount(std::vector<std::string> &playersID);

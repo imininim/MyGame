@@ -1,17 +1,44 @@
 #include "define.h"
 
+Pai PlayerCards::TransCard(const Pai &card) {
+	if(card > 26) {
+		return card+14;
+	}
+	if(card > 17) {
+		return card+13;
+	}
+	if(card > 8) {
+		return card+12;
+	}
+	return card+11;
+}
+
+Pai PlayerCards::reTransCard(const Pai &card) {
+	if(card > 40) {
+		return card-14;
+	}
+	if(card > 30) {
+		return card-13;
+	}
+	if(card > 20) {
+		return card-12;
+	}
+	if(card > 10) {
+		return card-11;
+	}
+	return card;
+}
+
 int PlayerCards::getCard(std::string &resp) {
+	resp = "";
+	int flag = 0;
 	for(int i = 0; i < 27; i ++) {
 		for(int j = 0; j < m_playCards[i]; j ++) {
-			if(i > 17) {
-				resp += COMMON::convert<int, std::string>(i+13);
+			if(flag) {
+				resp += "|";
 			}
-			else if(i > 8) {
-				resp += COMMON::convert<int, std::string>(i+12);
-			}
-			else {
-				resp += COMMON::convert<int, std::string>(i+11);
-			}
+			flag = 1;
+			resp += COMMON::convert<int, std::string>(TransCard(i));
 		}
 	}
 	return 0;
@@ -20,6 +47,7 @@ int PlayerCards::getCard(std::string &resp) {
 int PlayerCards::addCard(Pai idx) {
 	m_size ++;
 	m_playCards[idx] ++;
+	m_prePai = idx;
 	return 0;
 }
 
@@ -29,6 +57,18 @@ int PlayerCards::outCard(Pai idx) {
 	return 0;
 }
 
+int PlayerCards::chiCard(Pai idx, Pai card1, Pai card2) {
+	m_size -= 2;
+	m_playCards[card1] --;
+	m_playCards[card2] --;
+	std::vector<Pai> chi;
+	Pai Min = std::min(idx, std::min(card1, card2));
+	chi.push_back(Min);
+	chi.push_back(Min+1);
+	chi.push_back(Min+2);
+	m_playCardsChi.push_back(chi);
+	return 0;
+}
 
 int PlayerCards::pengCard(Pai idx) {
 	m_size -= 2;

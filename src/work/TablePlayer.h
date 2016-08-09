@@ -17,6 +17,10 @@ public:
 	TablePlayer() {
 		m_player = NULL;
 	}
+	int toHu() {
+		m_playerCards.toHu();
+		return 0;
+	}
 	int GetCard(std::string &uid, std::string &resp);
 	//出牌
 	int outCard(Pai idx);
@@ -28,8 +32,11 @@ public:
 	int gangCard(Pai idx);
 	//暗杠
 	int anGangCard(Pai idx);
+	//吃
+	int chiCard(Pai idx, Pai card1, Pai card2);
 	//胡
 	int huCard();
+	int guaJi();
 	//显示给客户端
 	int showLong(std::string &resp);
 	int showShort(std::string &resp);
