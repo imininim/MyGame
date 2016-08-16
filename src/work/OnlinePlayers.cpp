@@ -194,7 +194,7 @@ int OnlinePlayers::Register(const std::string &Account, const std::string &Passw
 	return ret;
 }
 
-int OnlinePlayers::Login(const std::string &Account, const std::string &Passwd, const std::string &Name) {
+int OnlinePlayers::Login(const std::string &Account, const std::string &Passwd, const std::string &Name, const std::string &Sex, const std::string &URL) {
 	int ret = 0;
 	pthread_mutex_lock(&m_mutex);
 	do {
@@ -221,11 +221,14 @@ int OnlinePlayers::Login(const std::string &Account, const std::string &Passwd, 
 		}
 
 		if(m_onlinePlayMap.find(Account) != m_onlinePlayMap.end()) {
-			ret = -1;
+			//ret = -1;
 			break;
 		}
 		//Player *player = new Player(tt);
 		Player *player = new Player(result[0]);
+		player->setName(Name);
+		player->setSex(Sex);
+		player->setURL(URL);
 		m_onlinePlayMap[Account] = player;
 	} while(0);
 	pthread_mutex_unlock(&m_mutex);
@@ -257,6 +260,13 @@ int OnlinePlayers::Logout(const std::string &Account, int &id) {
 		if(player == NULL) {
 			break;
 		}
+		std::string sql;
+		player->toSQL(sql);
+		if(m_mysql.insert(sql) == -1) {
+			ret = -1;
+			break;
+		}
+
 		Table *table = m_Player2TableMap[Account];
 		if(table != NULL) {
 			id = table->m_id;

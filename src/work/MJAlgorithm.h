@@ -48,6 +48,8 @@ public:
 public:
 	int Operator(const PlayerCards &playerCards, int &Operator, const int type, const Pai pai) {
 		int rpai = PlayerCards::reTransCard(pai);
+		std::cerr << "rpai = " << rpai << std::endl;
+		std::cerr << "pai = " << pai << std::endl;
 		Operator = 0;
 		if(m_alg->isHu(playerCards, type, rpai)) {
 			Operator |= HU;

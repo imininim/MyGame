@@ -33,17 +33,23 @@ public:
 	int m_zhuang;		//庄家
 	int m_people;		//人数
 	
+	int m_pStatus[4];	//游玩状态
+	int m_pPeople;		//准备人数
+
 	int m_doingPlayer;	//正在执行操作的玩家
-	int m_prePlayer;		//上一个玩家
+	int m_prePlayer;		//上一个打牌玩家
+	int m_level;			//当前优先级 10.天胡  9.胡牌  8.杠 7.碰  6.吃 
 	Pai m_prePai;			//上一张打出的牌
 	CardSender *m_cardSender;	//发牌器
 	GamePlayWay m_playGame;	//游戏玩法
-	CalScore m_calScore;
+	CalScore m_calScore;	//得分计算方法
+	int m_allScore[4];
 public:
 	Table(const Player *player, const int type, const int &id, const int &planPlay, const int &retCard);
 	~Table();
 public:
 	//玩家uid进行了 type操作 出了 card牌
+	int Again(const std::string &uid);
 	int PlayerOperator(const std::string &uid, const int &type, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
 	int BeginGame();
 	int GetPlayersID(std::string &players);
@@ -53,6 +59,7 @@ public:
 	int toClient(std::tr1::unordered_map<std::string, std::string> &playersOp);
 
 	int toResp(const int &id, std::string &uid, std::string &resp);
+	int toRespAgain(const int &id, std::string &uid, std::string &resp);
 	int GetAllCards(const int &id, std::string &uid, std::string &resp);
 };
 

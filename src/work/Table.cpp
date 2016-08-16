@@ -2,6 +2,57 @@
 #include "define.h"
 #include "Table.h"
 
+int Table::toRespAgain(const int &id, std::string &uid ,std::string &resp) {
+	std::cerr << "Again toResp" << std::endl;
+	/*int id = -1;
+	for(int i = 0; i < 4; i ++) {
+		if(m_status[i]) {
+			if(m_tablePlayers[i].m_player->m_account == uid) {
+				id = i;
+				break;
+			}
+		}
+	}*/
+	if(m_pStatus[id] == 0) {
+		std::cerr << "No palyer" << std::endl;
+		return -1;
+	}
+	uid = m_tablePlayers[id].m_player->m_account;
+	resp = "waitchange:";
+	resp += COMMON::convert<int, std::string>(m_planPlay)+"|"+
+			COMMON::convert<int, std::string>(m_remain)+"|"+
+			COMMON::convert<int, std::string>(m_pPeople)+"|"+
+			COMMON::convert<int, std::string>(id+1)+"|"+
+			COMMON::convert<int, std::string>(m_roomMan+1)+"|"+
+			COMMON::convert<int, std::string>(m_zhuang+1);
+	for(int i = 0; i < 4; i ++) {
+		resp += "|";
+		if(m_pStatus[i]) {
+			resp += m_tablePlayers[i].m_player->m_account;
+		}
+	}
+	for(int i = 0; i < 4; i ++) {
+		resp += "|";
+		if(m_pStatus[i]) {
+			resp += m_tablePlayers[i].m_player->m_name;
+		}
+	}
+	for(int i = 0; i < 4; i ++) {
+		resp += "|";
+		if(m_pStatus[i]) {
+			resp += m_tablePlayers[i].m_player->m_sex;
+		}
+	}
+	for(int i = 0; i < 4; i ++) {
+		resp += "|";
+		if(m_pStatus[i]) {
+			resp += m_tablePlayers[i].m_player->m_url;
+		}
+	}
+	std::cerr << "Again toResp" << std::endl;
+	return 0;
+}
+
 int Table::toResp(const int &id, std::string &uid, std::string &resp) {
 	if(m_status[id] == 0) {
 		return -1;
@@ -17,7 +68,25 @@ int Table::toResp(const int &id, std::string &uid, std::string &resp) {
 	for(int i = 0; i < 4; i ++) {
 		resp += "|";
 		if(m_status[i]) {
+			resp += m_tablePlayers[i].m_player->m_account;
+		}
+	}
+	for(int i = 0; i < 4; i ++) {
+		resp += "|";
+		if(m_status[i]) {
 			resp += m_tablePlayers[i].m_player->m_name;
+		}
+	}
+	for(int i = 0; i < 4; i ++) {
+		resp += "|";
+		if(m_status[i]) {
+			resp += m_tablePlayers[i].m_player->m_sex;
+		}
+	}
+	for(int i = 0; i < 4; i ++) {
+		resp += "|";
+		if(m_status[i]) {
+			resp += m_tablePlayers[i].m_player->m_url;
 		}
 	}
 	return 0;
@@ -35,6 +104,11 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 		newCard = PlayerCards::TransCard(newCard);
 		LOG_DEBUG("new Card %d", newCard);
 		m_tablePlayers[m_doingPlayer].addCard(newCard);
+		//起手胡牌
+		//{
+		//	m_tablePlayers[m_doingPlayer].toHu();
+		//	m_prePai = 9;
+		//}
 		for(int i = 0; i < 4; i ++) {
 			Resp res;
 			if(i == m_doingPlayer) {
@@ -69,11 +143,6 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			}
 		}
 		
-		/*{
-			m_tablePlayers[m_doingPlayer].toHu();
-			m_prePai = 9;
-		}*/
-
 		int type = (m_tablePlayers[m_doingPlayer].m_playerCards.m_size%3 == 1);
 		//判断是否胡牌
 		int Operator = 0;
@@ -145,52 +214,78 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 		int next = m_doingPlayer;
 		int flag = 0;
 		int Operator = 0;
+		m_level = 0;
+		int OptPlayer = -1;
+		int pOperator = 0;
 		while(next != m_prePlayer) {
 			//其他玩家是否收到这个牌
+			std::cerr << "dapai = " << next << std::endl;
 			int type = (m_tablePlayers[next].m_playerCards.m_size%3 == 1);
 			Operator = 0;
+			std::cerr << "type = " << type << std::endl;
+			int Operator = 0;
 			m_playGame.Operator(m_tablePlayers[next].m_playerCards, Operator, type, m_prePai);
-			if(Operator) {
+			if(Operator&(HU|CHI|GANG|PENG)) {
+				if(Operator&HU && m_level<9) {
+					m_level = 9;
+					OptPlayer = next;
+					pOperator = Operator;
+				}
+				if(Operator&GANG && m_level<8) {
+					m_level = 8;
+					OptPlayer = next;
+					pOperator = Operator;
+				}
+				if(Operator&PENG && m_level<7) {
+					m_level = 7;
+					OptPlayer = next;
+					pOperator = Operator;
+				}
+				if(Operator&CHI && m_level<6) {
+					m_level = 6;
+					OptPlayer = next;
+					pOperator = Operator;
+				}
 				flag = 1;
-				break;
+				//break;
 			}
 			next = (next+1)%4;
 		}
 
 		if(flag) {
-			m_doingPlayer = next;
-			res.m_uid = m_tablePlayers[next].m_player->m_account;
+			m_doingPlayer = OptPlayer;
+			res.m_uid = m_tablePlayers[m_doingPlayer].m_player->m_account;
 			res.m_resp = "game:choose";
 			int flag = 0;
-			if(Operator&HU) {
+			if(pOperator&HU) {
 				res.m_resp += "|hu";
 				flag ++;
 			}
-			if(Operator&CHI) {
+			if(pOperator&CHI) {
 				res.m_resp += "|chi";
 				flag ++;
 			}
-			if(Operator&GANG) {
+			if(pOperator&GANG) {
 				res.m_resp += "|gang";
 				flag ++;
 			}
-			if(Operator&PENG) {
+			if(pOperator&PENG) {
 				res.m_resp += "|peng";
 				flag ++;
 			}
-			if(Operator&GUO) {
+			if(pOperator&GUO) {
 				res.m_resp += "|guo";
 				flag ++;
 			}
-			if(Operator&TIANHU) {
+			if(pOperator&TIANHU) {
 				res.m_resp += "|tianhu";
 				flag ++;
 			}
-			if(Operator&CHUPAI) {
+			if(pOperator&CHUPAI) {
 				res.m_resp += "|dapai";
 				flag ++;
 			}
-			if(!(flag==1&&Operator&GUO)) {
+			if(!(flag==1&&pOperator&GUO)) {
 				resp.push_back(res);
 				return 0;
 			}
@@ -211,10 +306,31 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 				resp.push_back(res);
 			}
 		}
+
+		for(int i = 0; i < 4; i ++) {
+			Resp res;
+			res.m_uid = m_tablePlayers[i].m_player->m_account;
+			for(int j = 0; j < 4; j ++) {
+				if(i == j) {
+					std::string Cards;
+					std::string Uid;
+					m_tablePlayers[i].GetCard(Uid, Cards);
+					res.m_resp = "game:pai|"+COMMON::convert<int,std::string>(j+1)+"|"+
+							COMMON::convert<int,std::string>(m_tablePlayers[j].m_playerCards.m_size)+"|"+
+							Cards;
+				}
+				else {
+					res.m_resp = "game:pai|"+COMMON::convert<int,std::string>(j+1)+"|"+
+							COMMON::convert<int,std::string>(m_tablePlayers[j].m_playerCards.m_size);
+				}
+				resp.push_back(res);
+			}
+		}
+
 		//判断是否胡牌
 		int type = (m_tablePlayers[m_doingPlayer].m_playerCards.m_size%3 == 1);
 		Operator = 0;
-		m_playGame.Operator(m_tablePlayers[m_doingPlayer].m_playerCards, Operator, type, m_prePai);
+		m_playGame.Operator(m_tablePlayers[m_doingPlayer].m_playerCards, Operator, type, -1);
 		if(Operator) {
 			res.m_uid = m_tablePlayers[m_doingPlayer].m_player->m_account;
 			res.m_resp = "game:choose";
@@ -244,26 +360,65 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 		}
 	}
 	else if(type & GUO) {
-		//
-		m_doingPlayer = (m_doingPlayer+1)%4;
-		int next = m_doingPlayer;
-		int Operator = 0;
-		int flag = 0;
+		//m_doingPlayer = (m_doingPlayer+1)%4;
+		int OptArray[4] = {0,0,0,0};
+		int LevelArray[4] = {0,0,0,0};
+		int next = (m_prePlayer+1)%4;
 		while(next != m_prePlayer) {
-			//其他玩家是否收到这个牌
 			int type = (m_tablePlayers[next].m_playerCards.m_size%3 == 1);
-			Operator = 0;
+			int Operator = 0;
 			m_playGame.Operator(m_tablePlayers[next].m_playerCards, Operator, type, m_prePai);
-			if(Operator) {
-				flag = 1;
+			OptArray[next] = Operator;
+			if(Operator&(HU|CHI|GANG|PENG)) {
+				int level = 0;
+				if(Operator&CHI) {
+					level = 6;
+				}
+				if(Operator&PENG) {
+					level = 7;
+				}
+				if(Operator&GANG) {
+					level = 8;
+				}
+				if(Operator&HU) {
+					level = 9;
+				}
+				if(Operator&TIANHU) {
+					level = 10;
+				}
+				LevelArray[next] = level;
+			}
+			next = (next+1)%4;
+		}
+		
+		int doingPlayer = -1;
+		next = (m_doingPlayer+1)%4;
+		while(next != m_prePlayer) {
+			if(LevelArray[next] == m_level) {
+				doingPlayer = next;
 				break;
 			}
 			next = (next+1)%4;
 		}
-		if(flag) {
-			m_doingPlayer = next;
+		//std::cerr << "xxxx" << std::endl;
+		if(doingPlayer == -1) {
+			next = (m_prePlayer+1)%4;
+			int level = 0;
+			while(next != m_prePlayer) {
+				if(LevelArray[next] > level && LevelArray[next] < m_level) {
+					level = LevelArray[next];
+					doingPlayer = next;
+				}
+				next = (next+1)%4;
+			}
+			m_level = level;
+		}
+		if(doingPlayer != -1) {
+			std::cerr << "in jixu " << doingPlayer << std::endl;
+			m_doingPlayer = doingPlayer;
+			int Operator = OptArray[m_doingPlayer];
 			Resp res;
-			res.m_uid = m_tablePlayers[next].m_player->m_account;
+			res.m_uid = m_tablePlayers[m_doingPlayer].m_player->m_account;
 			res.m_resp = "game:choose";
 			if(Operator&HU) {
 				res.m_resp += "|hu";
@@ -287,6 +442,8 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			return 0;
 		}
 
+		m_doingPlayer = (m_prePlayer+1)%4;
+		std::cerr << "in mo pai" << std::endl;
 		int newCard = PlayerCards::TransCard(m_cardSender->getCard());
 		m_tablePlayers[m_doingPlayer].addCard(newCard);
 		for(int i = 0; i < 4; i ++) {
@@ -302,10 +459,31 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 				resp.push_back(res);
 			}
 		}
+
+		for(int i = 0; i < 4; i ++) {
+			Resp res;
+			res.m_uid = m_tablePlayers[i].m_player->m_account;
+			for(int j = 0; j < 4; j ++) {
+				if(i == j) {
+					std::string Cards;
+					std::string Uid;
+					m_tablePlayers[i].GetCard(Uid, Cards);
+					res.m_resp = "game:pai|"+COMMON::convert<int,std::string>(j+1)+"|"+
+							COMMON::convert<int,std::string>(m_tablePlayers[j].m_playerCards.m_size)+"|"+
+							Cards;
+				}
+				else {
+					res.m_resp = "game:pai|"+COMMON::convert<int,std::string>(j+1)+"|"+
+							COMMON::convert<int,std::string>(m_tablePlayers[j].m_playerCards.m_size);
+				}
+				resp.push_back(res);
+			}
+		}
+
 		//判断是否胡牌
 		int type = (m_tablePlayers[m_doingPlayer].m_playerCards.m_size%3 == 1);
-		Operator = 0;
-		m_playGame.Operator(m_tablePlayers[m_doingPlayer].m_playerCards, Operator, type, m_prePai);
+		int Operator = 0;
+		m_playGame.Operator(m_tablePlayers[m_doingPlayer].m_playerCards, Operator, type, -1);
 		if(Operator) {
 			Resp res;
 			res.m_uid = m_tablePlayers[m_doingPlayer].m_player->m_account;
@@ -331,6 +509,38 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			resp.push_back(res);
 			return 0;
 		}
+		//m_doingPlayer = (m_prePlayer+1)%4;
+		/*int next = m_doingPlayer;
+		int Operator = 0;
+		int flag = 0;
+		int level = 0;
+		while(next != m_prePlayer) {
+			//其他玩家是否收到这个牌
+			int type = (m_tablePlayers[next].m_playerCards.m_size%3 == 1);
+			Operator = 0;
+			m_playGame.Operator(m_tablePlayers[next].m_playerCards, Operator, type, m_prePai);
+			if(Operator&(HU|CHI|GANG|PENG)) {
+				if(Operator&HU && level<9) {
+					level = 9;
+					OptPlayer = next;
+				}
+				if(OptPlayer&GANG && level<8) {
+					level = 8;
+					OptPlayer = next;
+				}
+				if(Opt&PENG && level<7) {
+					level = 7;
+					OptPlayer = next;
+				}
+				if(Opt&CHI && level<6) {
+					level = 6;
+					OptPlayer = next;
+				}
+				flag = 1;
+				//break;
+			}
+			next = (next+1)%4;
+		}*/
 	}
 	else if(type & GANG) {
 		int flag = 0;
@@ -425,7 +635,7 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 		for(int i = 0; i < 4; i ++) {
 			//if(i != m_doingPlayer) {
 			res.m_uid = m_tablePlayers[i].m_player->m_account;
-			res.m_resp = "game:peng|"+COMMON::convert<int,std::string>(m_doingPlayer)+"|"+
+			res.m_resp = "game:peng|"+COMMON::convert<int,std::string>(m_doingPlayer+1)+"|"+
 							COMMON::convert<int,std::string>(card);
 			resp.push_back(res);
 			//res.m_resp = "game:dapai|dapai|"+COMMON::convert<int,std::string>(m_doingPlayer+1);
@@ -454,7 +664,7 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 		}
 		int type = (m_tablePlayers[m_doingPlayer].m_playerCards.m_size%3 == 1);
 		int Operator = 0;
-		m_playGame.Operator(m_tablePlayers[m_doingPlayer].m_playerCards, Operator, type, m_prePai);
+		m_playGame.Operator(m_tablePlayers[m_doingPlayer].m_playerCards, Operator, type, -1);
 		if(Operator) {
 			res.m_uid = m_tablePlayers[m_doingPlayer].m_player->m_account;
 			res.m_resp = "game:choose";
@@ -483,7 +693,8 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 		}
 	}
 	else if(type & HU) {
-		if(m_doingPlayer) {
+		if(m_tableStatus) {
+			m_tableStatus = 0;
 			int type = (m_tablePlayers[m_doingPlayer].m_playerCards.m_size%3 == 1);
 			int Operator = 0;
 			m_playGame.Operator(m_tablePlayers[m_doingPlayer].m_playerCards, Operator, type, m_prePai);
@@ -491,20 +702,50 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 				m_tableStatus = 0;
 			}
 
+			for(int i = 0; i < 4; i ++) {
+				m_pStatus[i] = 0;
+			}
+			m_pPeople = 0;
 			int score = m_calScore.GetScore(0);
 
+			//m_remain --;
 			std::string cards;
 			std::string tmpID;
 			m_tablePlayers[m_doingPlayer].GetCard(tmpID, cards);
 			
 			for(int i = 0; i < 4; i ++) {
-				if(i != m_doingPlayer) {
-					Resp res;
-					res.m_uid = m_tablePlayers[i].m_player->m_account;
-					res.m_resp = "game:hu|"+COMMON::convert<int,std::string>(m_doingPlayer+1)+"|"+
-									cards;
+				Resp res;
+				res.m_uid = m_tablePlayers[i].m_player->m_account;
+				for(int j = 0; j < 4; j ++) {
+					std::string Cards;
+					std::string Uid;
+					m_tablePlayers[i].GetCard(Uid, Cards);
+					res.m_resp = "game:allpai|"+COMMON::convert<int,std::string>(j+1)+"|"+Cards;
 					resp.push_back(res);
 				}
+			}
+
+			for(int i = 0; i < 4; i ++) {
+				//if(i != m_doingPlayer) {
+					Resp res;
+					res.m_uid = m_tablePlayers[i].m_player->m_account;
+					res.m_resp = "game:hu|"+COMMON::convert<int,std::string>(m_doingPlayer+1)+"|";
+									//cards;
+					resp.push_back(res);
+				//}
+			}
+			int ZhaMa = m_cardSender->getZhaMa();
+			std::string strCard = "";
+			for(int i = 0; i < ZhaMa; i ++) {
+				Pai newCard = m_cardSender->getCard();
+				newCard = PlayerCards::TransCard(newCard);
+				strCard += COMMON::convert<int,std::string>(newCard);
+			}
+			for(int i = 0; i < 4; i ++) {
+				Resp res;
+				res.m_uid = m_tablePlayers[i].m_player->m_account;
+				res.m_resp = "game:zama|"+strCard;
+				resp.push_back(res);
 			}
 			if(type == 0) {
 				Resp res;
@@ -512,11 +753,14 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 				for(int i = 0; i < 4; i ++) {
 					if(i == m_doingPlayer) {
 						strScore += "|"+COMMON::convert<int,std::string>(score*3);
+						m_allScore[i] += score*3;
 					}
 					else {
+						m_allScore[i] -= score;
 						strScore += "|"+COMMON::convert<int,std::string>(-score);
 					}
 				}
+				m_zhuang = m_doingPlayer;
 				for(int i = 0; i < 4; i ++) {
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
 					res.m_resp = "game:end"+strScore;
@@ -528,18 +772,36 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 				std::string strScore;
 				for(int i = 0; i < 4; i ++) {
 					if(i == m_doingPlayer) {
+						m_allScore[i] += score;
 						strScore += "|"+COMMON::convert<int,std::string>(score);
 					}
 					else if(i == m_prePlayer) {
+						m_allScore[i] -= score;
 						strScore += "|"+COMMON::convert<int,std::string>(-score);
 					}
 					else {
-						strScore += "|";
+						strScore += "|0";
 					}
 				}
+				m_zhuang = m_doingPlayer;
 				for(int i = 0; i < 4; i ++) {
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
 					res.m_resp = "game:end"+strScore;
+					resp.push_back(res);
+				}
+			}
+			if(m_remain == 0) {
+				std::string strScore;
+				for(int i = 0; i < 4; i ++) {
+					if(i != 0) {
+						strScore += "|";
+					}
+					strScore += COMMON::convert<int,std::string>(m_allScore[i]);
+				}
+				for(int i = 0; i < 4; i ++) {
+					Resp res;
+					res.m_uid = m_tablePlayers[i].m_player->m_account;
+					res.m_resp = "game:over|"+strScore;
 					resp.push_back(res);
 				}
 			}
@@ -631,7 +893,7 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 				int type = (m_tablePlayers[next].m_playerCards.m_size%3 == 1);
 				Operator = 0;
 				m_playGame.Operator(m_tablePlayers[next].m_playerCards, Operator, type, m_prePai);
-				if(Operator) {
+				if(Operator&(HU|CHI|GANG|PENG)) {
 					flag = 1;
 					break;
 				}
@@ -836,8 +1098,10 @@ int Table::InRoom(const Player *player) {
 	for(int i = 0; i < 4; i ++) {
 		if(m_status[i] == 0) {
 			m_status[i] = 1;
+			m_pStatus[i] = 1;
 			m_tablePlayers[i] = TablePlayer(player);
 			m_people ++;
+			m_pPeople ++;
 			break;
 		}
 	}
@@ -853,7 +1117,9 @@ int Table::OutRoom(const Player *player) {
 		if(m_status[i]) {
 			if(m_tablePlayers[i].m_player == player) {
 				m_status[i] = 0;
+				m_pStatus[i] = 0;
 				m_people --;
+				m_pPeople --;
 				ret = 0;
 				break;
 			}
@@ -861,6 +1127,7 @@ int Table::OutRoom(const Player *player) {
 	}
 	if(m_status[m_roomMan] == 0) {
 		m_people = 0;
+		m_pPeople = 0;
 	}
 	return ret;
 }
@@ -919,8 +1186,11 @@ Table::Table(const Player *player, const int type, const int &id, const int &pla
 
 	m_tablePlayers[0] = TablePlayer(player);
 	m_status[0] = 1;
+	m_pStatus[0] = 1;
 	for(int i = 1; i < 4; i ++) {
 		m_status[i] = 0;
+		m_pStatus[i] = 0;
+		m_allScore[i] = 0;
 	}
 	m_retCard = retCard;
 	
@@ -929,6 +1199,7 @@ Table::Table(const Player *player, const int type, const int &id, const int &pla
 	m_tableStatus = 0;
 	m_zhuang = 0;
 	m_people = 1;
+	m_pPeople = 1;
 
 	m_doingPlayer = -1;
 	m_prePlayer = -1;
@@ -958,14 +1229,19 @@ int Table::BeginGame() {
 		}
 		m_isPay = 1;
 	}
+	if(m_remain == 0) {
+		return -1;
+	}
 	m_tableStatus = 1;
+	m_cardSender->init();
 	for(int i = 0; i < 4; i ++) {
-		if(m_status[i]) {
+		m_tablePlayers[i].init();
+	}
+	for(int i = 0; i < 4; i ++) {
+		if(m_pStatus[i]) {
 			for(int j = 0; j < 13; j ++) {
 				Pai p = m_cardSender->getCard();
-				//LOG_DEBUG("Pai = %d", p);
 				p = PlayerCards::TransCard(p);
-				//LOG_DEBUG("Pai = %d", p);
 				m_tablePlayers[i].addCard(p);
 			}
 		}
@@ -973,11 +1249,7 @@ int Table::BeginGame() {
 	LOG_DEBUG("end get Card");
 
 	m_remain --;
-	//Pai pai = m_cardSender->getCard();
 	m_doingPlayer = m_zhuang;
-	//m_playGame.Operator(m_tablePlayer[m_zhuang].m_playerCards, m_tablePlayer[m_zhuang].m_Operator, 0, pai);
-	//m_tablePlayers[m_zhuang].m_pai = pai;
-	//m_tablePlayers[m_zhuang].addCard(PlayerCards::TransCard(pai));
 	return 0;
 }
 
@@ -1002,3 +1274,24 @@ int Table::GetAllCards(const int &id, std::string &uid, std::string &resp) {
 	resp += cards;
 	return 0;
 }
+
+int Table::Again(const std::string &uid) {
+	std::cerr << "in Again" << std::endl;
+	int id = -1;
+	for(int i = 0; i < 4; i ++) {
+		if(m_status[i]) {
+			if(m_tablePlayers[i].m_player->m_account == uid) {
+				id = i;
+				break;
+			}
+		}
+	}
+	if(id == -1) {
+		return -1;
+	}
+	m_pPeople ++;
+	m_pStatus[id] = 1;
+	std::cerr << "in Again end" << std::endl;
+	return 0;
+}
+

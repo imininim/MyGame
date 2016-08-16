@@ -70,6 +70,9 @@ int Game::PlayGame(const std::string &uid, const std::string &commands, std::vec
 		OnlinePlayers *onlinePlayer = OnlinePlayers::getOnlinePlayers();
 		Table *table = onlinePlayer->GetTable(uid);
 		table->PlayerOperator(uid, type, card, card2, card3, resp);
+		if(table->m_tableStatus == 0 && table->m_remain == 0) {
+			onlinePlayer->DestroyTable(table->m_id);
+		}
 		ret = 0;
 	} while(0);
 	
@@ -98,22 +101,20 @@ int Game::Begin(const std::string &uid, const std::string &commands, std::vector
 		LOG_ERROR("table id error:%s", uid.c_str());
 		return -1;
 	}
-	if(table->BeginGame()) {
+	if(table->BeginGame() == -1) {
 		return -1;
 	}
-
 	Resp res;
 	for(int i = 0; i < 4; i ++) {
 		table->GetAllCards(i, res.m_uid, res.m_resp);
 		resp.push_back(res);
 	}
 
-	table->PlayerOperator(uid, MOPAI, 0, 0, 0, resp);
+	int zhuang = table->m_zhuang;
+	std::string zid = table->m_tablePlayers[zhuang].m_player->m_account;
 
-	for(int i = 0; i < 4; i ++) {
-		table->GetAllCards(i, res.m_uid, res.m_resp);
-		std::cerr << "card: " << res.m_resp << std::endl;
-	}
+	table->PlayerOperator(zid, MOPAI, 0, 0, 0, resp);
+
 	return 0;
 }
 
@@ -231,13 +232,27 @@ int Game::CreateTable(const std::string &uid, const std::string &commands, std::
 		if(ret == -1) {
 			break;
 		}
+
+		OnlinePlayers *onlinePlayer = OnlinePlayers::getOnlinePlayers();
+		Table *table = onlinePlayer->GetTable(id);
+		if(table == NULL) {
+			ret = -1;
+			break;
+		}
 		res.m_resp = "createroom:yes|"+COMMON::convert<int, std::string>(id);
+		res.m_uid = uid;
+		resp.push_back(res);
+		for(int i = 0; i < 4; i ++) {
+			if(table->toResp(i, res.m_uid, res.m_resp) != -1) {
+				resp.push_back(res);
+			}
+		}
 	} while(0);
 	if(ret == -1) {
 		res.m_resp = "inroom:no";
+		res.m_uid = uid;
+		resp.push_back(res);
 	}
-	res.m_uid = uid;
-	resp.push_back(res);
 	return ret;
 }
 
@@ -269,11 +284,14 @@ int Game::doGame(std::string &uid, const std::string &commands, std::vector<Resp
 	else if(Opt == "outroom") {
 		Game::OutRoom(uid, command, resp);
 	}
-	else if(commands.find("startgame") != std::string::npos) {
+	else if(Opt == "startgame") {
 		Game::Begin(uid, command, resp);	//开始游戏
 	}
-	else if(commands.find("game") != std::string::npos) {
+	else if(Opt == "game") {
 		Game::PlayGame(uid, command, resp);	//玩游戏
+	}
+	else if(Opt == "again") {
+		Game::Again(uid, command, resp);	//再来一局
 	}
 	/*else if(commands.find("end") != std::string::npos) {
 		//Game::End();	//结束游戏
@@ -285,7 +303,27 @@ int Game::doGame(std::string &uid, const std::string &commands, std::vector<Resp
 	}*/
 }
 
+int Game::Again(const std::string &uid, const std::string &commands, std::vector<Resp> &resp) {
+	int Ret = -1;
+	do {
+		OnlinePlayers *onlinePlayer = OnlinePlayers::getOnlinePlayers();
+		Table *table = onlinePlayer->GetTable(uid);
+		if(table == NULL) {
+			break;
+		}
+		std::cerr << "IN Again" << std::endl;
+		table->Again(uid);
+		Resp res;
+		for(int i = 0; i < 4; i ++) {
+			if(table->toRespAgain(i, res.m_uid, res.m_resp) != -1) {
+				resp.push_back(res);
+			}
+		}
+		Ret = 0;
+	} while(0);
 
+	return Ret;
+}
 
 int Game::Register(const std::string &uid, const std::string &commands, std::vector<Resp> &resp) {
 	//reg:account|xxxxx#passwd|yyyyyy    xxx是帐号 yyyy是密码
@@ -331,18 +369,20 @@ int Game::Login(std::string &uid, const std::string &commands, std::vector<Resp>
 		LOG_ALERT("将消息打印出来: %s,  %u", commands.c_str(), commands.size());
 		std::vector<std::string> Info;
 		COMMON::sepString(commands, "|", Info);
-		if(Info.size() != 2) {
+		if(Info.size() != 4) {
 			LOG_ALERT("%s commands error", commands.c_str());
 			break;
 		}
 		std::string account = Info[0];
 		std::string name = Info[1];
+		std::string sex = Info[2];
+		std::string url = Info[3];
 		std::string passwd = "1";
 		OnlinePlayers *onlinePlayer = OnlinePlayers::getOnlinePlayers();
 		if(GameConfig::debug > 1) {
 			std::cerr << "account = " << account << " passwd = " << passwd << " name = " << name << std::endl;
 		}
-		if(onlinePlayer->Login(account, passwd, name) == -1) {
+		if(onlinePlayer->Login(account, passwd, name, sex, url) == -1) {
 			break;
 		}
 		const Player *player = onlinePlayer->GetPlayer(account);

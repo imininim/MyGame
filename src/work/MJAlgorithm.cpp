@@ -10,8 +10,10 @@ bool PingjiangMJ::isChi(const PlayerCards &playerCards, const int type, const Pa
 bool PingjiangMJ::isPeng(const PlayerCards &playerCards, const int type, const Pai pai) {
 	//如果手上少于两张一样的牌，就不能碰
 	if(type == 0) {
+		std::cerr << "type = 0" << std::endl;
 		return false;
 	}
+	std::cerr << "m_playCards = " << playerCards.m_playCards[pai] << std::endl;
 	if(playerCards.m_playCards[pai] >= 2) {
 		return true;
 	}
@@ -19,18 +21,19 @@ bool PingjiangMJ::isPeng(const PlayerCards &playerCards, const int type, const P
 }
 
 bool PingjiangMJ::isGang(const PlayerCards &playerCards, const int type, const Pai pai) {
-	//如果手上摸到的
-	if(type == 0) {
-		for(int i = 0; i < playerCards.m_playCardsPeng.size(); i ++) {
-			if(playerCards.m_playCardsPeng[i][0] == pai) {
-				std::cerr << "gang" << std::endl;
-				return true;
-			}
+	//如果别人打的
+	if(type == 1) {
+		if(playerCards.m_playCards[pai] == 3) {
+			std::cerr << "peng gang" << std::endl;
+			return true;
 		}
 	}
-	else if(type == 1) {
-		if(playerCards.m_playCards[pai] == 3) {
-			return true;
+	else if(type == 0) {
+		for(int i = 0; i < playerCards.m_playCardsPeng.size(); i ++) {
+			if(playerCards.m_playCardsPeng[i][0] == pai) {
+				std::cerr << "mo gang" << std::endl;
+				return true;
+			}
 		}
 	}
 	return false;
@@ -60,11 +63,16 @@ bool PingjiangMJ::isChu(const PlayerCards &playerCards, const int type, const Pa
 
 bool PingjiangMJ::isAnGang(const PlayerCards &playerCards, const int type, const Pai pai) {
 	if(type == 0) {
-		std::cerr << "agnang size = " << playerCards.m_playCards[pai] << std::endl;
-		if(playerCards.m_playCards[pai] == 4) {
-			std::cerr << "angang" << std::endl;
-			return true;
+		//std::cerr << "agnang size = " << playerCards.m_playCards[pai] << std::endl;
+		for(int i = 0; i < 27; i ++) {
+			if(playerCards.m_playCards[i] == 4) {
+				return true;
+			}
 		}
+		//if(playerCards.m_playCards[pai] == 4) {
+		//	std::cerr << "angang" << std::endl;
+		//	return true;
+		//}
 	}
 	return false;
 }
@@ -88,7 +96,8 @@ bool PingjiangMJ::isHu(const PlayerCards &playerCards, const int type, const Pai
 		Pai m_mjt[30];
 		int ret = 0;
 		memcpy(m_mjt, playerCards.m_playCards, sizeof(playerCards.m_playCards));
-		if(JIANG[pai]) {
+		if(JIANG[pai] && m_mjt[pai]>=1) {
+			std::cerr << "in jiang hu" << std::endl;
 			m_mjt[pai] -= 1;
 			ret = 0;
 			memcpy(m_mj, m_mjt, sizeof(m_mjt));
@@ -96,11 +105,13 @@ bool PingjiangMJ::isHu(const PlayerCards &playerCards, const int type, const Pai
 			ret += playerCards.m_playCardsGang.size();
 			ret += playerCards.m_playCardsAnGang.size();
 			if(Judge4X3(m_mj, ret)) {
+				std::cerr << "jiang hu" << std::endl;
 				return true;
 			}
 		}
 		memcpy(m_mjt, playerCards.m_playCards, sizeof(playerCards.m_playCards));
 		if(m_mjt[pai] >= 2) {
+			std::cerr << "in no jiang hu" << std::endl;
 			m_mjt[pai] -= 2;
 			memcpy(m_mj, m_mjt, sizeof(m_mjt));
 			for(int i = 0; i < 27; i ++) {
@@ -113,6 +124,7 @@ bool PingjiangMJ::isHu(const PlayerCards &playerCards, const int type, const Pai
 						ret += playerCards.m_playCardsAnGang.size();
 						m_mj[i] -= 2;
 						if(Judge4X3(m_mj, ret)) {
+							std::cerr << "no jiang hu" << std::endl;
 							return true;
 						}
 					}
@@ -120,7 +132,7 @@ bool PingjiangMJ::isHu(const PlayerCards &playerCards, const int type, const Pai
 			}
 		}
 		memcpy(m_mjt, playerCards.m_playCards, sizeof(playerCards.m_playCards));
-		if((pai+2 < 27) && m_mjt[pai+1]>0 && m_mjt[pai+2]>0 && ((pai+8/9) == (pai+10)/9)) {
+		if((pai+2 < 27) && m_mjt[pai+1]>0 && m_mjt[pai+2]>0 && (((pai+8)/9) == (pai+10)/9)) {
 			memcpy(m_mj, m_mjt, sizeof(m_mjt));
 			m_mjt[pai+1] -= 1;
 			m_mjt[pai+2] -= 1;
@@ -135,6 +147,7 @@ bool PingjiangMJ::isHu(const PlayerCards &playerCards, const int type, const Pai
 						ret += playerCards.m_playCardsAnGang.size();
 						m_mj[i] -= 2;
 						if(Judge4X3(m_mj, ret)) {
+							std::cerr << " chi hu 1" << std::endl;
 							return true;
 						}
 					}
@@ -142,7 +155,7 @@ bool PingjiangMJ::isHu(const PlayerCards &playerCards, const int type, const Pai
 			}
 		}
 		memcpy(m_mjt, playerCards.m_playCards, sizeof(playerCards.m_playCards));
-		if((pai-2 >= 0) && m_mjt[pai-1]>0 && m_mjt[pai-2]>0 && ((pai+8/9) == (pai+6)/9)) {
+		if((pai-2 >= 0) && m_mjt[pai-1]>0 && m_mjt[pai-2]>0 && (((pai+8)/9) == (pai+6)/9)) {
 			memcpy(m_mj, m_mjt, sizeof(m_mjt));
 			m_mjt[pai-1] -= 1;
 			m_mjt[pai-2] -= 1;
@@ -157,6 +170,7 @@ bool PingjiangMJ::isHu(const PlayerCards &playerCards, const int type, const Pai
 						ret += playerCards.m_playCardsAnGang.size();
 						m_mj[i] -= 2;
 						if(Judge4X3(m_mj, ret)) {
+							std::cerr << " chi hu 2" << std::endl;
 							return true;
 						}
 					}
@@ -164,7 +178,7 @@ bool PingjiangMJ::isHu(const PlayerCards &playerCards, const int type, const Pai
 			}
 		}
 		memcpy(m_mjt, playerCards.m_playCards, sizeof(playerCards.m_playCards));
-		if((pai-1 >= 0 && pai+1<27) && m_mjt[pai-1]>0 && m_mjt[pai+1]>0 && ((pai+9/9) == (pai+7)/9)) {
+		if((pai-1 >= 0 && pai+1<27) && m_mjt[pai-1]>0 && m_mjt[pai+1]>0 && (((pai+9)/9) == (pai+7)/9)) {
 			memcpy(m_mj, m_mjt, sizeof(m_mjt));
 			m_mjt[pai-1] -= 1;
 			m_mjt[pai+1] -= 1;
@@ -179,6 +193,7 @@ bool PingjiangMJ::isHu(const PlayerCards &playerCards, const int type, const Pai
 						ret += playerCards.m_playCardsAnGang.size();
 						m_mj[i] -= 2;
 						if(Judge4X3(m_mj, ret)) {
+							std::cerr << " chi hu 3" << std::endl;
 							return true;
 						}
 					}

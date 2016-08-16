@@ -17,6 +17,7 @@ public:
 	TablePlayer() {
 		m_player = NULL;
 	}
+	int init();
 	int toHu() {
 		m_playerCards.toHu();
 		return 0;

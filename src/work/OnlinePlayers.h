@@ -22,7 +22,7 @@ public:
 	//注册 ok
 	int Register(const std::string &Account, const std::string &Passwd);
 	//登录 ok
-	int Login(const std::string &Account, const std::string &Passwd, const std::string &Name);
+	int Login(const std::string &Account, const std::string &Passwd, const std::string &Name, const std::string &Sex, const std::string &URL);
 	//退出 
 	int Logout(const std::string &Account, int &id);
 	//创建房间

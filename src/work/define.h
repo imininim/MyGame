@@ -40,20 +40,29 @@ public:
 		m_size = 0;
 		m_prePai = -1;
 	}
+	int init() {
+		m_playCardsPeng.clear();
+		m_playCardsGang.clear();
+		m_playCardsAnGang.clear();
+		m_playCardsChi.clear();
+		memset(m_playCards, 0, sizeof(m_playCards));
+		m_size = 0;
+		m_prePai = -1;
+	}
 	//直接胡牌
 	int toHu() {
 		//测试代码
 		{
+			//memset(m_playCards, 0,sizeof(m_playCards));
+			//for(int xx = 0; xx < 6; xx ++) {
+			//	m_playCards[xx] += 2;
+			//}
+			//m_playCards[7] = 2;
 			/*memset(m_playCards, 0,sizeof(m_playCards));
-			for(int xx = 0; xx < 6; xx ++) {
-				m_playCards[xx] += 2;
-			}
-			m_playCards[7] = 2;*/
-			memset(m_playCards, 0,sizeof(m_playCards));
 			for(int xx = 0; xx < 5; xx ++) {
 				m_playCards[xx] += 2;
 			}
-			m_playCards[9] = 4;
+			m_playCards[9] = 4;*/
 		}
 		return 0;
 	}

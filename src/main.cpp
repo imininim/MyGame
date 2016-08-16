@@ -61,10 +61,10 @@ struct CMyFrame: public CFrame
 	{
 		if(bLogin)
 		{
-			std::string str("well come to heiye chat!");
+			//std::string str("well come to heiye chat!");
 			
 			cout << "CMyFrame::OnLogin 有客户端登录服务器 ip = " << loginInfo.strLoginIP.c_str() << "port = " << loginInfo.nRemotePort << endl;
-			pTCPHandle->SendMsg(str.c_str(), str.size());
+			//pTCPHandle->SendMsg(str.c_str(), str.size());
 			m_handles.insert(pTCPHandle); //保存这个连接
 
 		}
