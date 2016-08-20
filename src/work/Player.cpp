@@ -7,6 +7,7 @@ Player::Player(const std::vector<std::string> &Info) {
 	m_roomCard = COMMON::convert<std::string, int>(Info[3]);
 	m_PlayNum = COMMON::convert<std::string, int>(Info[4]);
 	m_id = COMMON::convert<std::string, int>(Info[5]);
+	m_score = COMMON::convert<std::string, int>(Info[6]);
 }
 
 void Player::show() const {

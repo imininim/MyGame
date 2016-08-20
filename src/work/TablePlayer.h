@@ -22,6 +22,14 @@ public:
 		m_playerCards.toHu();
 		return 0;
 	}
+	int GetRandomCard() {
+		for(int i = 0; i < 27; i ++) {
+			if(m_playerCards.m_playCards[i] > 0) {
+				return i;
+			}
+		}
+		return -1;
+	}
 	int GetCard(std::string &uid, std::string &resp);
 	//出牌
 	int outCard(Pai idx);

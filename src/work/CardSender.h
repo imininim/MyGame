@@ -36,10 +36,13 @@ public:
 		for(int i = 0; i < 30; i ++) {
 			m_card[i] = 4;
 		}
-		m_p = 128;
+		m_p = 108;
 		m_p -= m_retCard;
 	}
 	virtual Pai getCard() {
+		if(m_p == 0) {
+			return -1;
+		}
 		int pai = COMMON::random(27);
 		while(m_card[pai] == 0) {
 			pai ++;

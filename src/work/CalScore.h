@@ -13,8 +13,38 @@ public:
 		m_retCardList = retCardList;
 		return 0;
 	}
-	int GetScore(int type) {
-		return 10;
+	int GetScore(int type, int huIdx, int idx, int zhuang, int dahu) {
+		int Score = 0;
+		if(type == 0) {
+			if(dahu) {
+				Score += 3*dahu;
+			}
+			else {
+				Score += 1;
+			}
+			if(huIdx == zhuang) {
+				Score += 1;
+			}
+			if(idx == zhuang) {
+				Score += 1;
+			}
+		}
+		else if(type == 1) {
+			if(dahu) {
+				Score += 6*dahu;
+			}
+			else {
+				Score += 1;
+			}
+			if(huIdx == zhuang) {
+				Score += 1;
+			}
+			if(idx == zhuang) {
+				Score += 1;
+			}
+		}
+
+		return -Score;
 	}
 };
 

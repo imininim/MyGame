@@ -53,16 +53,16 @@ public:
 	int toHu() {
 		//测试代码
 		{
+			memset(m_playCards, 0,sizeof(m_playCards));
+			for(int xx = 0; xx < 4; xx ++) {
+				m_playCards[xx] += 3;
+			}
+			m_playCards[7] = 1;
 			//memset(m_playCards, 0,sizeof(m_playCards));
-			//for(int xx = 0; xx < 6; xx ++) {
+			//for(int xx = 0; xx < 5; xx ++) {
 			//	m_playCards[xx] += 2;
 			//}
-			//m_playCards[7] = 2;
-			/*memset(m_playCards, 0,sizeof(m_playCards));
-			for(int xx = 0; xx < 5; xx ++) {
-				m_playCards[xx] += 2;
-			}
-			m_playCards[9] = 4;*/
+			//m_playCards[9] = 4;
 		}
 		return 0;
 	}

@@ -129,34 +129,14 @@ int OnlinePlayers::Register_Unlock(const std::string &Account, const std::string
 			break;
 		}
 
-		std::string sql1 = "insert into Player(account, passwd, name, roomCard) value ('"+Account+"', '"+Passwd+"', '"+Name+"', 100);";
-		sql =              "insert into Player(account, passwd, name, roomCard) value ('"+Account+"', '"+Passwd+"', 'yangshu', 100);";
-		if(sql1 != sql) {
-			LOG_DEBUG("*********** Name length = %d   %s", Name.length(), Name.c_str());
-			for (std::string::const_iterator it = Name.begin(); it != Name.end(); ++it)
-			{
-				LOG_DEBUG("** %d", *it);
-			}
-			
-			std::string test1 = "!"+Name+"!";
-			
-			
-			std::string test2 = "!yangshu!";
-			LOG_DEBUG("*********** test1 length = %u   %s", test1.size(), test1.c_str());
-			LOG_DEBUG("*********** test2 length = %d   %s", test2.length(), test2.c_str());
-			LOG_DEBUG("*********** Name length = %d", Name.length());
-			LOG_DEBUG("*********** sql length = %d    %s", sql.length(), sql.c_str());
-			LOG_DEBUG("*********** sql1 length = %d   %s", sql1.length(), sql1.c_str());
-			LOG_DEBUG("*********** sql no equal");
-		}
+		//std::string sql1 = "insert into Player(account, passwd, name, roomCard) value ('"+Account+"', '"+Passwd+"', '"+Name+"', 3);";
+		sql =              "insert into Player(account, passwd, name, roomCard) value ('"+Account+"', '"+Passwd+"', 'yangshu', 3);";
 		//std::cerr << m_mysql.insert(sql) << std::endl;
 		if(m_mysql.insert(sql) == -1) {
 			LOG_DEBUG("insert error");
 			ret = -1;
 			break;
 		}
-		std::cerr << sql << std::endl;
-		LOG_DEBUG("sql = %s", sql.c_str());
 		LOG_DEBUG("Register OK");
 	} while(0);
 	//lck.unlock();
@@ -198,7 +178,7 @@ int OnlinePlayers::Login(const std::string &Account, const std::string &Passwd, 
 	int ret = 0;
 	pthread_mutex_lock(&m_mutex);
 	do {
-		std::string sql = "select account, passwd, name, roomCard, playNum, id from Player where account='"+Account+"' and passwd='"+Passwd+"';";
+		std::string sql = "select account, passwd, name, roomCard, playNum, id, score from Player where account='"+Account+"' and passwd='"+Passwd+"';";
 		std::vector<std::vector<std::string> > result;
 		m_mysql.select(sql, result);
 		//如果没有注册的玩家立即注册
@@ -263,6 +243,7 @@ int OnlinePlayers::Logout(const std::string &Account, int &id) {
 		std::string sql;
 		player->toSQL(sql);
 		if(m_mysql.insert(sql) == -1) {
+			LOG_ALERT("sql error");
 			ret = -1;
 			break;
 		}
@@ -270,7 +251,10 @@ int OnlinePlayers::Logout(const std::string &Account, int &id) {
 		Table *table = m_Player2TableMap[Account];
 		if(table != NULL) {
 			id = table->m_id;
-			table->OutRoom(player);
+			if(table->OutRoom(player) == -1) {
+				LOG_ALERT("OutRoom error");
+				break;
+			}
 		}
 		std::tr1::unordered_map<std::string, Table*>::iterator it = m_Player2TableMap.find(Account);
 		if(it != m_Player2TableMap.end()) {

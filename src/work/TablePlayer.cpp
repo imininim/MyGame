@@ -4,6 +4,8 @@ int TablePlayer::init() {
 	return m_playerCards.init();
 }
 
+
+
 int TablePlayer::chiCard(Pai idx, Pai card1, Pai card2) {
 	return m_playerCards.chiCard(PlayerCards::reTransCard(idx), PlayerCards::reTransCard(card1), PlayerCards::reTransCard(card2));
 }
@@ -14,6 +16,7 @@ int TablePlayer::GetCard(std::string &uid, std::string &resp) {
 }
 
 int TablePlayer::addCard(Pai idx) {
+	m_pai = idx;
 	return m_playerCards.addCard(PlayerCards::reTransCard(idx));
 }
 

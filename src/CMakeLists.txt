@@ -29,6 +29,7 @@ SET(SRC_LIST main.cpp
 	work/TablePlayer.cpp
 	work/Resp.h
 	work/CalScore.h
+	work/TimeQueue.h
 #	common/myMempool.cpp
 #	common/sockClient.cpp
 #	common/myalgorithm.cpp

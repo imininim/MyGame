@@ -257,8 +257,10 @@ int Game::CreateTable(const std::string &uid, const std::string &commands, std::
 }
 
 int Game::doGame(std::string &uid, const std::string &commands, std::vector<Resp> &resp) {
+
 	if(GameConfig::debug > 1) {
-		std::cerr << "in DoGame" << std::endl;
+		std::cerr << "in DoGame uid = " << uid << " commands = " << commands << std::endl;
+
 	}
 	int pos = commands.find(":");
 	if(pos == std::string::npos) {

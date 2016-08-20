@@ -11,6 +11,7 @@ using namespace std;
 
 #include <work/Game.h>
 #include <work/GameConfig.h>
+#include <work/TimeQueue.h>
 #include <common/MySQLManager.h>
 //#include <work/>
 
@@ -30,11 +31,12 @@ struct CMyFrame: public CFrame
 		static char buf3[] = "hello Timer 3";
 
 		m_pServer->AddSignal(20, (void*)buf); // ctrl-z 信号
+		m_pServer->SetDeadCheck(300);
 			
 		struct	timeval  ti = {1, 0};  //3秒一次的定时器
-		struct	timeval  ti2 = {3, 0};  //1秒一次的定时器
+		//struct	timeval  ti2 = {3, 0};  //1秒一次的定时器
 		m_pServer->SetTimer(100, ti, (void*)buf1);
-		m_pServer->SetTimer(103, ti2, (void*)buf3);
+		//m_pServer->SetTimer(103, ti2, (void*)buf3);
 
 		return true;
 	
@@ -139,9 +141,9 @@ struct CMyFrame: public CFrame
 			if(Sock2ID.find(pTCPHandle) == Sock2ID.end()) {
 				Sock2ID[pTCPHandle] = uid;
 			}
-			if(ID2Sock.find(uid) == ID2Sock.end()) {
+			//if(ID2Sock.find(uid) == ID2Sock.end()) {
 				ID2Sock[uid] = pTCPHandle;
-			}
+			//}
 
 			for(int i = 0; i < resp.size(); i ++) {
 				std::string &id = resp[i].m_uid;
@@ -251,7 +253,31 @@ struct CMyFrame: public CFrame
 	virtual void OnTimer(iEventPtr& pEventHandle, void* params)
 	{
 		//cout << "定时器到: " << pEventHandle->GetEventId() << ", params = " << (char*)params << endl;
-	
+		if(pEventHandle->GetEventId() == 100) {
+			cerr <<  "in Timer" << endl;
+			PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
+			playerQueue->addTime();
+			playerQueue->show();
+			std::vector<std::string> gjUid;
+			playerQueue->getGuaJI(gjUid);
+			for(int i = 0; i < gjUid.size(); i ++) {
+				std::vector<Resp> resp;
+				Game::doGame(gjUid[i], "game:guaji", resp);
+				LOG_DEBUG("GUAJI %s", gjUid[i].c_str());
+				for(int i = 0; i < resp.size(); i ++) {
+					std::string &id = resp[i].m_uid;
+					std::string res = resp[i].m_resp+"#";
+					cerr << "to id:" << id << "   resp:" << res << endl;
+					if(ID2Sock.find(id) != ID2Sock.end()) {
+						iTCPHandlePtr &sender = ID2Sock[id];
+						sender->SendMsg(res.c_str(), res.size());
+					}
+					else {
+						cerr << id << "  error id" << endl;
+					}
+				}
+			}
+		}
 	}
 	std::set<iTCPHandlePtr> m_handles;
 };

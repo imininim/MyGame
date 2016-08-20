@@ -7,7 +7,7 @@ class MJAlgorithm {
 public:
 	
 public:
-	virtual bool isHu(const PlayerCards &playerCards, const int type, const Pai pai)=0;
+	virtual bool isHu(const PlayerCards &playerCards, const int type, const Pai pai, int &dahu)=0;
 	virtual bool isGuo(const PlayerCards &playerCards, const int type, const Pai pai)=0;
 	virtual bool isChu(const PlayerCards &playerCards, const int type, const Pai pai)=0;
 	virtual bool isGang(const PlayerCards &playerCards, const int type, const Pai pai)=0;
@@ -28,7 +28,7 @@ public:
 	virtual bool isChi(const PlayerCards &playerCards, const int type, const Pai pai);
 	virtual bool isAnGang(const PlayerCards &playerCards, const int type, const Pai pai);
 
-	virtual bool isHu(const PlayerCards &playerCards, const int type, const Pai pai);
+	virtual bool isHu(const PlayerCards &playerCards, const int type, const Pai pai, int &hu);
 	bool pengPengHu(const PlayerCards &playerCards, const int type, const Pai pai);
 	bool jiangJiangHu(const PlayerCards &playerCards, const int type, const Pai pai);
 	bool oneColer(const PlayerCards &playerCards, const int type, const Pai pai);
@@ -46,12 +46,12 @@ public:
 		m_alg = new PingjiangMJ();
 	}
 public:
-	int Operator(const PlayerCards &playerCards, int &Operator, const int type, const Pai pai) {
+	int Operator(const PlayerCards &playerCards, int &Operator, const int type, const Pai pai, int &dahu) {
 		int rpai = PlayerCards::reTransCard(pai);
 		std::cerr << "rpai = " << rpai << std::endl;
 		std::cerr << "pai = " << pai << std::endl;
 		Operator = 0;
-		if(m_alg->isHu(playerCards, type, rpai)) {
+		if(m_alg->isHu(playerCards, type, rpai, dahu)) {
 			Operator |= HU;
 		}
 		if(m_alg->isPeng(playerCards, type, rpai)) {
