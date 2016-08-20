@@ -35,12 +35,21 @@ int Game::PlayGame(const std::string &uid, const std::string &commands, std::vec
 		int card = -1, card2 = -1, card3 = -1;
 		if(Info.size() >= 4) {
 			card3 = COMMON::convert<std::string, int>(Info[3]);
+			if(card3 < 0) {
+				return 0;
+			}
 		}
 		if(Info.size() >= 3) {
 			card2 = COMMON::convert<std::string, int>(Info[2]);
+			if(card2 < 0) {
+				return 0;
+			}
 		}
 		if(Info.size() >= 2) {
 			card = COMMON::convert<std::string, int>(Info[1]);
+			if(card < 0) {
+				return 0;
+			}
 		}
 		if(Info[0] == "th") {
 			type |= 1;
@@ -67,6 +76,12 @@ int Game::PlayGame(const std::string &uid, const std::string &commands, std::vec
 			type |= 128;
 		}
 		
+		/*if(card < 0) {
+			return 0;
+		}
+		if((card2 < -1) || card3 < -1) {
+			return 0;
+		}*/
 		OnlinePlayers *onlinePlayer = OnlinePlayers::getOnlinePlayers();
 		Table *table = onlinePlayer->GetTable(uid);
 		table->PlayerOperator(uid, type, card, card2, card3, resp);

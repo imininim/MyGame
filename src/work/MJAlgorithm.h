@@ -3,6 +3,8 @@
 
 #include "define.h"
 
+const int JIANG[] = {0,1,0,0,1,0,0,1,0, 0,1,0,0,1,0,0,1,0, 0,1,0,0,1,0,0,1,0};
+
 class MJAlgorithm {
 public:
 	

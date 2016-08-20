@@ -1,6 +1,6 @@
 #include "MJAlgorithm.h"
 
-int JIANG[] = {0,1,0,0,1,0,0,1,0, 0,1,0,0,1,0,0,1,0, 0,1,0,0,1,0,0,1,0};
+//int JIANG[] = {0,1,0,0,1,0,0,1,0, 0,1,0,0,1,0,0,1,0, 0,1,0,0,1,0,0,1,0};
 
 bool PingjiangMJ::isChi(const PlayerCards &playerCards, const int type, const Pai pai) {
 	if(type == 0) {

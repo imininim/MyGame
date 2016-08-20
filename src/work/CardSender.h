@@ -1,6 +1,7 @@
 #ifndef __CARDSENDER_H__
 #define __CARDSENDER_H__
 
+#include "MJAlgorithm.h"
 #include "define.h"
 #include "common/CommonFuc.h"
 
@@ -12,6 +13,7 @@ public:
 	virtual bool isLastOne()=0;
 	virtual bool isNull()=0;
 	virtual int getZhaMa()=0;
+	virtual Pai getJiang()=0;
 };
 
 //发牌器
@@ -39,12 +41,27 @@ public:
 		m_p = 108;
 		m_p -= m_retCard;
 	}
+
 	virtual Pai getCard() {
 		if(m_p == 0) {
 			return -1;
 		}
 		int pai = COMMON::random(27);
 		while(m_card[pai] == 0) {
+			pai ++;
+			pai %= 27;
+		}
+		std::cerr << "pai size = " << m_card[pai] << std::endl;
+		m_card[pai] --;
+		m_p --;
+		return pai;
+	}
+	virtual Pai getJiang() {
+		if(m_p == 0) {
+			return -1;
+		}
+		int pai = COMMON::random(27);
+		while(m_card[pai] == 0 && JIANG[pai]==0) {
 			pai ++;
 			pai %= 27;
 		}

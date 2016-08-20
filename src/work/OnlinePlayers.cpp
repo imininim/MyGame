@@ -42,6 +42,7 @@ int OnlinePlayers::InTable(const std::string &Account, int id) {
 		}
 		if(m_Player2TableMap.find(Account) != m_Player2TableMap.end()) {
 			LOG_DEBUG("%s account id has in table", Account.c_str());
+			ret = 0;
 			break;
 		}
 		const Player *player = m_onlinePlayMap[Account];

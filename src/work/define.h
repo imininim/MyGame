@@ -54,8 +54,8 @@ public:
 		//测试代码
 		{
 			memset(m_playCards, 0,sizeof(m_playCards));
-			for(int xx = 0; xx < 4; xx ++) {
-				m_playCards[xx] += 3;
+			for(int xx = 0; xx < 3; xx ++) {
+				m_playCards[xx] += 4;
 			}
 			m_playCards[7] = 1;
 			//memset(m_playCards, 0,sizeof(m_playCards));

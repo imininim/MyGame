@@ -124,14 +124,15 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			}
 			return 0;
 		}
-		newCard = PlayerCards::TransCard(newCard);
-		LOG_DEBUG("MOPAI Card %d", newCard);
-		m_tablePlayers[m_doingPlayer].addCard(newCard);
 		//起手胡牌
 		{
 			m_tablePlayers[m_doingPlayer].toHu();
 			m_prePai = 9;
 		}
+		newCard = PlayerCards::TransCard(newCard);
+		LOG_DEBUG("MOPAI Card %d", newCard);
+		m_tablePlayers[m_doingPlayer].addCard(newCard);
+
 		PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
 		playerQueue->add(m_tablePlayers[m_doingPlayer].m_player);
 		for(int i = 0; i < 4; i ++) {
@@ -466,7 +467,9 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			}
 			m_level = level;
 		}
+
 		if(doingPlayer != -1) {
+			LOG_DEBUG("has Player OPT");
 			m_doingPlayer = doingPlayer;
 			PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
 			playerQueue->add(m_tablePlayers[m_doingPlayer].m_player);
@@ -496,6 +499,7 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			return 0;
 		}
 
+		LOG_DEBUG("No player OPT");
 		m_doingPlayer = (m_prePlayer+1)%4;
 		int newCard = m_cardSender->getCard();
 		if(newCard < 0) {
@@ -1120,11 +1124,14 @@ int Table::BeginGame() {
 	}
 	for(int i = 0; i < 4; i ++) {
 		if(m_pStatus[i]) {
-			for(int j = 0; j < 13; j ++) {
+			for(int j = 0; j < 12; j ++) {
 				Pai p = m_cardSender->getCard();
 				p = PlayerCards::TransCard(p);
 				m_tablePlayers[i].addCard(p);
 			}
+			Pai p = m_cardSender->getJiang();
+			p = PlayerCards::TransCard(p);
+			m_tablePlayers[i].addCard(p);
 		}
 	}
 	LOG_DEBUG("end get Card");
