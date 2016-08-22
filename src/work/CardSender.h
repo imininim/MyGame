@@ -7,6 +7,7 @@
 
 class CardSender {
 public:
+	virtual int getRemain()=0;
 	virtual ~CardSender() {}
 	virtual Pai getCard()=0;
 	virtual int init()=0;
@@ -31,6 +32,9 @@ public:
 		//delete[] m_card;
 		//m_card = NULL;
 	}
+	virtual int getRemain() {
+		return m_p;
+	}
 	virtual int getZhaMa() {
 		return m_retCard;
 	}
@@ -47,7 +51,7 @@ public:
 			return -1;
 		}
 		int pai = COMMON::random(27);
-		while(m_card[pai] == 0) {
+		while(m_card[pai] <= 0) {
 			pai ++;
 			pai %= 27;
 		}
@@ -61,7 +65,7 @@ public:
 			return -1;
 		}
 		int pai = COMMON::random(27);
-		while(m_card[pai] == 0 && JIANG[pai]==0) {
+		while(m_card[pai] <= 0 && JIANG[pai]==0) {
 			pai ++;
 			pai %= 27;
 		}

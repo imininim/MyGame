@@ -78,6 +78,23 @@ struct CMyFrame: public CFrame
 			if(Sock2ID.find(pTCPHandle) != Sock2ID.end()) {
 				uid = Sock2ID[pTCPHandle];
 			}
+			//单方面存在的直接删除
+			if(uid != "" && ID2Sock.find(uid) == ID2Sock.end()) {
+				cerr << "单方面存在" << std::endl;
+				std::map<iTCPHandlePtr, std::string>::iterator iit = Sock2ID.find(pTCPHandle);
+				Sock2ID.erase(iit);
+				uid = "";
+			}
+			//单方面存在的直接删除
+			if(uid != "" && ID2Sock.find(uid) != ID2Sock.end()) {
+				if(pTCPHandle != ID2Sock[uid]) {
+					cerr << "不对等存在" << std::endl;
+					std::map<iTCPHandlePtr, std::string>::iterator iit = Sock2ID.find(pTCPHandle);
+					Sock2ID.erase(iit);
+					uid = "";
+				}
+			}
+
 			if(uid != "") {
 				std::vector<Resp> resp;
 				Game::doGame(uid, "logout:", resp);
@@ -134,6 +151,23 @@ struct CMyFrame: public CFrame
 		if(Sock2ID.find(pTCPHandle) != Sock2ID.end()) {
 			uid = Sock2ID[pTCPHandle];
 		}
+		//单方面存在的直接删除
+		if(uid != "" && ID2Sock.find(uid) == ID2Sock.end()) {
+			cerr << "单方面存在" << std::endl;
+			std::map<iTCPHandlePtr, std::string>::iterator iit = Sock2ID.find(pTCPHandle);
+			Sock2ID.erase(iit);
+			uid = "";
+		}
+		//单方面存在的直接删除
+		if(uid != "" && ID2Sock.find(uid) != ID2Sock.end()) {
+			if(pTCPHandle != ID2Sock[uid]) {
+				std::map<iTCPHandlePtr, std::string>::iterator iit = Sock2ID.find(pTCPHandle);
+				Sock2ID.erase(iit);
+				cerr << "不对等存在" << std::endl;
+				uid = "";
+			}
+		}
+
 		std::vector<Resp> resp;
 		Game::doGame(uid, msg, resp);
 
@@ -189,6 +223,22 @@ struct CMyFrame: public CFrame
 		std::string uid;
 		if(Sock2ID.find(pTCPHandle) != Sock2ID.end()) {
 			uid = Sock2ID[pTCPHandle];
+		}
+		//单方面存在的直接删除
+		if(uid != "" && ID2Sock.find(uid) == ID2Sock.end()) {
+			cerr << "单方面存在" << std::endl;
+			std::map<iTCPHandlePtr, std::string>::iterator iit = Sock2ID.find(pTCPHandle);
+			Sock2ID.erase(iit);
+			uid = "";
+		}
+		//单方面存在的直接删除
+		if(uid != "" && ID2Sock.find(uid) != ID2Sock.end()) {
+			if(pTCPHandle != ID2Sock[uid]) {
+				cerr << "不对等存在" << std::endl;
+				std::map<iTCPHandlePtr, std::string>::iterator iit = Sock2ID.find(pTCPHandle);
+				Sock2ID.erase(iit);
+				uid = "";
+			}
 		}
 		if(uid != "") {
 			std::vector<Resp> resp;
@@ -254,7 +304,7 @@ struct CMyFrame: public CFrame
 	{
 		//cout << "定时器到: " << pEventHandle->GetEventId() << ", params = " << (char*)params << endl;
 		if(pEventHandle->GetEventId() == 100) {
-			cerr <<  "in Timer" << endl;
+			//cerr <<  "in Timer" << endl;
 			PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
 			playerQueue->addTime();
 			playerQueue->show();

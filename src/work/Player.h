@@ -46,6 +46,7 @@ public:
 		return 0;
 	}
 public:
+	int m_id;
 	std::string m_account;
 	std::string m_name;
 	std::string m_url;
@@ -54,7 +55,6 @@ private:
 	std::string m_passwd;
 	int m_roomCard;
 	int m_PlayNum;
-	int m_id;
 	int m_score;
 };
 

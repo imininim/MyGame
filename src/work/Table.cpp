@@ -20,7 +20,7 @@ int Table::toRespAgain(const int &id, std::string &uid ,std::string &resp) {
 	for(int i = 0; i < 4; i ++) {
 		resp += "|";
 		if(m_pStatus[i]) {
-			resp += m_tablePlayers[i].m_player->m_account;
+			resp += COMMON::convert<int,std::string>(m_tablePlayers[i].m_player->m_id);
 		}
 	}
 	for(int i = 0; i < 4; i ++) {
@@ -41,6 +41,7 @@ int Table::toRespAgain(const int &id, std::string &uid ,std::string &resp) {
 			resp += m_tablePlayers[i].m_player->m_url;
 		}
 	}
+	resp += "|"+COMMON::convert<int,std::string>(m_cardSender->getZhaMa());
 	std::cerr << "Again toResp" << std::endl;
 	return 0;
 }
@@ -81,6 +82,7 @@ int Table::toResp(const int &id, std::string &uid, std::string &resp) {
 			resp += m_tablePlayers[i].m_player->m_url;
 		}
 	}
+	resp += "|"+COMMON::convert<int,std::string>(m_cardSender->getZhaMa());
 	return 0;
 }
 
@@ -97,44 +99,69 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			int ScoreArray[4] = {0,0,0,0};
 			{
 				Resp res;
+				for(int i = 0; i < 4; i ++) {
+					Resp res;
+					res.m_uid = m_tablePlayers[i].m_player->m_account;
+					for(int j = 0; j < 4; j ++) {
+						std::string Cards;
+						std::string Uid;
+						m_tablePlayers[j].GetCard(Uid, Cards);
+						res.m_resp = "game:allpai|"+COMMON::convert<int,std::string>(j+1)+"|"+Cards;
+						resp.push_back(res);
+					}
+				}
 				std::string strScore;
 				for(int i = 0; i < 4; i ++) {
 					strScore += "|"+COMMON::convert<int,std::string>(ScoreArray[i]);
 				}
 				for(int i = 0; i < 4; i ++) {
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
-					res.m_resp = "game:end"+strScore;
+					res.m_resp = "game:couz"+strScore;
 					resp.push_back(res);
 				}
+				m_tableStatus = 0;
+				PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
+				for(int i = 0; i < 4; i ++) {
+					playerQueue->sub(m_tablePlayers[m_doingPlayer].m_player);
+				}
+
+				for(int i = 0; i < 4; i ++) {
+					m_pStatus[i] = 0;
+				}
+				m_pPeople = 0;
 			}
 			if(m_remain == 0) {
-				std::string strScore;
-				for(int i = 0; i < 4; i ++) {
-					if(i != 0) {
-						strScore += "|";
-					}
-					strScore += COMMON::convert<int,std::string>(m_allScore[i]);
-				}
+				std::string str;
+				m_playScore.toResp(str);
 				for(int i = 0; i < 4; i ++) {
 					Resp res;
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
-					res.m_resp = "game:over|"+strScore;
+					res.m_resp = str;
 					resp.push_back(res);
 				}
 			}
 			return 0;
 		}
 		//起手胡牌
-		{
+		/*{
 			m_tablePlayers[m_doingPlayer].toHu();
 			m_prePai = 9;
-		}
+			newCard = 7;
+		}*/
 		newCard = PlayerCards::TransCard(newCard);
 		LOG_DEBUG("MOPAI Card %d", newCard);
 		m_tablePlayers[m_doingPlayer].addCard(newCard);
 
 		PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
 		playerQueue->add(m_tablePlayers[m_doingPlayer].m_player);
+
+		for(int i = 0; i < 4; i ++) {
+			Resp res;
+			res.m_uid = m_tablePlayers[i].m_player->m_account;
+			res.m_resp = "game:remainpai|"+COMMON::convert<int,std::string>(m_cardSender->getRemain());
+			resp.push_back(res);
+		}
+
 		for(int i = 0; i < 4; i ++) {
 			Resp res;
 			if(i == m_doingPlayer) {
@@ -205,7 +232,6 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 								COMMON::convert<int, std::string>(card);
 			resp.push_back(res);
 		}
-
 
 		for(int i = 0; i < 4; i ++) {
 			Resp res;
@@ -319,33 +345,57 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			int ScoreArray[4] = {0,0,0,0};
 			{
 				Resp res;
+				for(int i = 0; i < 4; i ++) {
+					Resp res;
+					res.m_uid = m_tablePlayers[i].m_player->m_account;
+					for(int j = 0; j < 4; j ++) {
+						std::string Cards;
+						std::string Uid;
+						m_tablePlayers[j].GetCard(Uid, Cards);
+						res.m_resp = "game:allpai|"+COMMON::convert<int,std::string>(j+1)+"|"+Cards;
+						resp.push_back(res);
+					}
+				}
 				std::string strScore;
 				for(int i = 0; i < 4; i ++) {
 					strScore += "|"+COMMON::convert<int,std::string>(ScoreArray[i]);
 				}
 				for(int i = 0; i < 4; i ++) {
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
-					res.m_resp = "game:end"+strScore;
+					res.m_resp = "game:couz"+strScore;
 					resp.push_back(res);
 				}
+				m_tableStatus = 0;
+				PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
+				for(int i = 0; i < 4; i ++) {
+					playerQueue->sub(m_tablePlayers[m_doingPlayer].m_player);
+				}
+
+				for(int i = 0; i < 4; i ++) {
+					m_pStatus[i] = 0;
+				}
+				m_pPeople = 0;
 			}
 			if(m_remain == 0) {
-				std::string strScore;
-				for(int i = 0; i < 4; i ++) {
-					if(i != 0) {
-						strScore += "|";
-					}
-					strScore += COMMON::convert<int,std::string>(m_allScore[i]);
-				}
+				std::string str;
+				m_playScore.toResp(str);
 				for(int i = 0; i < 4; i ++) {
 					Resp res;
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
-					res.m_resp = "game:over|"+strScore;
+					res.m_resp = str;
 					resp.push_back(res);
 				}
 			}
 			return 0;
 		}
+
+		for(int i = 0; i < 4; i ++) {
+			Resp res;
+			res.m_uid = m_tablePlayers[i].m_player->m_account;
+			res.m_resp = "game:remainpai|"+COMMON::convert<int,std::string>(m_cardSender->getRemain());
+			resp.push_back(res);
+		}
+
 		newCard = PlayerCards::TransCard(newCard);
 		m_tablePlayers[m_doingPlayer].addCard(newCard);
 		playerQueue->add(m_tablePlayers[m_doingPlayer].m_player);
@@ -506,28 +556,44 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			int ScoreArray[4] = {0,0,0,0};
 			{
 				Resp res;
+				for(int i = 0; i < 4; i ++) {
+					Resp res;
+					res.m_uid = m_tablePlayers[i].m_player->m_account;
+					for(int j = 0; j < 4; j ++) {
+						std::string Cards;
+						std::string Uid;
+						m_tablePlayers[j].GetCard(Uid, Cards);
+						res.m_resp = "game:allpai|"+COMMON::convert<int,std::string>(j+1)+"|"+Cards;
+						resp.push_back(res);
+					}
+				}
 				std::string strScore;
 				for(int i = 0; i < 4; i ++) {
 					strScore += "|"+COMMON::convert<int,std::string>(ScoreArray[i]);
 				}
 				for(int i = 0; i < 4; i ++) {
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
-					res.m_resp = "game:end"+strScore;
+					res.m_resp = "game:couz"+strScore;
 					resp.push_back(res);
 				}
+				m_tableStatus = 0;
+				PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
+				for(int i = 0; i < 4; i ++) {
+					playerQueue->sub(m_tablePlayers[m_doingPlayer].m_player);
+				}
+
+				for(int i = 0; i < 4; i ++) {
+					m_pStatus[i] = 0;
+				}
+				m_pPeople = 0;
 			}
 			if(m_remain == 0) {
-				std::string strScore;
-				for(int i = 0; i < 4; i ++) {
-					if(i != 0) {
-						strScore += "|";
-					}
-					strScore += COMMON::convert<int,std::string>(m_allScore[i]);
-				}
+				std::string str;
+				m_playScore.toResp(str);
 				for(int i = 0; i < 4; i ++) {
 					Resp res;
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
-					res.m_resp = "game:over|"+strScore;
+					res.m_resp = str;
 					resp.push_back(res);
 				}
 			}
@@ -536,6 +602,12 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 		newCard = PlayerCards::TransCard(newCard);
 		m_tablePlayers[m_doingPlayer].addCard(newCard);
 
+		for(int i = 0; i < 4; i ++) {
+			Resp res;
+			res.m_uid = m_tablePlayers[i].m_player->m_account;
+			res.m_resp = "game:remainpai|"+COMMON::convert<int,std::string>(m_cardSender->getRemain());
+			resp.push_back(res);
+		}
 		playerQueue->add(m_tablePlayers[m_doingPlayer].m_player);
 		for(int i = 0; i < 4; i ++) {
 			Resp res;
@@ -597,12 +669,10 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 		}
 	}
 	else if(type & GANG) {
-		int flag = 0;
 		if(m_tablePlayers[m_doingPlayer].m_playerCards.m_size%3 == 1) {
 			m_tablePlayers[m_doingPlayer].gangCard(card);
 		}
 		else {
-			flag = 1;
 			m_tablePlayers[m_doingPlayer].anGangCard(card);
 		}
 
@@ -619,32 +689,54 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			int ScoreArray[4] = {0,0,0,0};
 			{
 				Resp res;
+				for(int i = 0; i < 4; i ++) {
+					Resp res;
+					res.m_uid = m_tablePlayers[i].m_player->m_account;
+					for(int j = 0; j < 4; j ++) {
+						std::string Cards;
+						std::string Uid;
+						m_tablePlayers[j].GetCard(Uid, Cards);
+						res.m_resp = "game:allpai|"+COMMON::convert<int,std::string>(j+1)+"|"+Cards;
+						resp.push_back(res);
+					}
+				}
 				std::string strScore;
 				for(int i = 0; i < 4; i ++) {
 					strScore += "|"+COMMON::convert<int,std::string>(ScoreArray[i]);
 				}
 				for(int i = 0; i < 4; i ++) {
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
-					res.m_resp = "game:end"+strScore;
+					res.m_resp = "game:couz"+strScore;
 					resp.push_back(res);
 				}
+				m_tableStatus = 0;
+				PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
+				for(int i = 0; i < 4; i ++) {
+					playerQueue->sub(m_tablePlayers[m_doingPlayer].m_player);
+				}
+
+				for(int i = 0; i < 4; i ++) {
+					m_pStatus[i] = 0;
+				}
+				m_pPeople = 0;
 			}
 			if(m_remain == 0) {
-				std::string strScore;
-				for(int i = 0; i < 4; i ++) {
-					if(i != 0) {
-						strScore += "|";
-					}
-					strScore += COMMON::convert<int,std::string>(m_allScore[i]);
-				}
+				std::string str;
+				m_playScore.toResp(str);
 				for(int i = 0; i < 4; i ++) {
 					Resp res;
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
-					res.m_resp = "game:over|"+strScore;
+					res.m_resp = str;
 					resp.push_back(res);
 				}
 			}
 			return 0;
+		}
+		for(int i = 0; i < 4; i ++) {
+			Resp res;
+			res.m_uid = m_tablePlayers[i].m_player->m_account;
+			res.m_resp = "game:remainpai|"+COMMON::convert<int,std::string>(m_cardSender->getRemain());
+			resp.push_back(res);
 		}
 		newCard = PlayerCards::TransCard(newCard);
 		m_tablePlayers[m_doingPlayer].addCard(newCard);
@@ -658,6 +750,25 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			else {
 				res.m_uid = m_tablePlayers[i].m_player->m_account;
 				res.m_resp = "game:mopai|mopai|"+COMMON::convert<int, std::string>(m_doingPlayer+1);
+				resp.push_back(res);
+			}
+		}
+		for(int i = 0; i < 4; i ++) {
+			Resp res;
+			res.m_uid = m_tablePlayers[i].m_player->m_account;
+			for(int j = 0; j < 4; j ++) {
+				if(i == j) {
+					std::string Cards;
+					std::string Uid;
+					m_tablePlayers[i].GetCard(Uid, Cards);
+					res.m_resp = "game:pai|"+COMMON::convert<int,std::string>(j+1)+"|"+
+							COMMON::convert<int,std::string>(m_tablePlayers[j].m_playerCards.m_size)+"|"+
+							Cards;
+				}
+				else {
+					res.m_resp = "game:pai|"+COMMON::convert<int,std::string>(j+1)+"|"+
+							COMMON::convert<int,std::string>(m_tablePlayers[j].m_playerCards.m_size);
+				}
 				resp.push_back(res);
 			}
 		}
@@ -682,25 +793,6 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 				res.m_resp += "|dapai";
 			}
 			resp.push_back(res);
-		}
-		for(int i = 0; i < 4; i ++) {
-			Resp res;
-			res.m_uid = m_tablePlayers[i].m_player->m_account;
-			for(int j = 0; j < 4; j ++) {
-				if(i == j) {
-					std::string Cards;
-					std::string Uid;
-					m_tablePlayers[i].GetCard(Uid, Cards);
-					res.m_resp = "game:pai|"+COMMON::convert<int,std::string>(j+1)+"|"+
-							COMMON::convert<int,std::string>(m_tablePlayers[j].m_playerCards.m_size)+"|"+
-							Cards;
-				}
-				else {
-					res.m_resp = "game:pai|"+COMMON::convert<int,std::string>(j+1)+"|"+
-							COMMON::convert<int,std::string>(m_tablePlayers[j].m_playerCards.m_size);
-				}
-				resp.push_back(res);
-			}
 		}
 	}
 	else if(type & PENG) {
@@ -788,7 +880,7 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 				for(int j = 0; j < 4; j ++) {
 					std::string Cards;
 					std::string Uid;
-					m_tablePlayers[i].GetCard(Uid, Cards);
+					m_tablePlayers[j].GetCard(Uid, Cards);
 					res.m_resp = "game:allpai|"+COMMON::convert<int,std::string>(j+1)+"|"+Cards;
 					resp.push_back(res);
 				}
@@ -798,19 +890,27 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 				Resp res;
 				res.m_uid = m_tablePlayers[i].m_player->m_account;
 				res.m_resp = "game:hu|"+COMMON::convert<int,std::string>(m_doingPlayer+1)+"|";
+				if(type == 0) {
+					res.m_resp += COMMON::convert<int,std::string>(m_tablePlayers[m_doingPlayer].m_pai);
+				}
+				else if(type == 1) {
+					res.m_resp += COMMON::convert<int,std::string>(PlayerCards::TransCard(m_prePai));
+				}
 				resp.push_back(res);
 			}
 			int ZhaMa = m_cardSender->getZhaMa();
 			std::string strCard = "";
+			m_calScore.init();
 			for(int i = 0; i < ZhaMa; i ++) {
 				Pai newCard = m_cardSender->getCard();
+				m_calScore.addZhaMa(newCard, m_doingPlayer, m_zhuang);
 				newCard = PlayerCards::TransCard(newCard);
-				strCard += COMMON::convert<int,std::string>(newCard);
+				strCard += "|"+COMMON::convert<int,std::string>(newCard);
 			}
 			for(int i = 0; i < 4; i ++) {
 				Resp res;
 				res.m_uid = m_tablePlayers[i].m_player->m_account;
-				res.m_resp = "game:zama|"+strCard;
+				res.m_resp = "game:zama"+strCard;
 				resp.push_back(res);
 			}
 			int ScoreArray[4] = {0,0,0,0};
@@ -824,22 +924,33 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 						GetScore += ScoreArray[i];
 					}
 				}
-				ScoreArray[m_doingPlayer] = GetScore;
+				ScoreArray[m_doingPlayer] = -GetScore;
 
 				for(int i = 0; i < 4; i ++) {
 					Player *tplayer = (Player *)m_tablePlayers[i].m_player;
 					tplayer->changeScore(ScoreArray[i]);
 				}
 
+				m_zhuang = m_doingPlayer;
 				for(int i = 0; i < 4; i ++) {
 					strScore += "|"+COMMON::convert<int,std::string>(ScoreArray[i]);
-					m_allScore[i] += ScoreArray[i];
 				}
-				m_zhuang = m_doingPlayer;
 				for(int i = 0; i < 4; i ++) {
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
 					res.m_resp = "game:end"+strScore;
 					resp.push_back(res);
+				}
+				for(int i = 0; i < 4; i ++) {
+					if(i == m_doingPlayer) {
+						int xiaohu = 1;
+						if(dahu) {
+							xiaohu = 0;
+						}
+						m_playScore.add(i, ScoreArray[i], dahu, xiaohu, m_calScore.getZhaMa());
+					}
+					else {
+						m_playScore.add(i, ScoreArray[i], 0, 0, 0);
+					}
 				}
 			}
 			else {
@@ -848,34 +959,40 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 				int GetScore = 0;
 				ScoreArray[m_prePlayer] = m_calScore.GetScore(type, m_doingPlayer, m_prePlayer, m_zhuang, dahu);
 				GetScore += ScoreArray[m_prePlayer];
-				ScoreArray[m_doingPlayer] = GetScore;
-				for(int i = 0; i < 4; i ++) {
-					strScore += "|"+COMMON::convert<int,std::string>(ScoreArray[i]);
-					m_allScore[i] += ScoreArray[i];
-				}
+				ScoreArray[m_doingPlayer] = -GetScore;
 				for(int i = 0; i < 4; i ++) {
 					Player *tplayer = (Player *)m_tablePlayers[i].m_player;
 					tplayer->changeScore(ScoreArray[i]);
 				}
 				m_zhuang = m_doingPlayer;
 				for(int i = 0; i < 4; i ++) {
+					strScore += "|"+COMMON::convert<int,std::string>(ScoreArray[i]);
+				}
+				for(int i = 0; i < 4; i ++) {
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
 					res.m_resp = "game:end"+strScore;
 					resp.push_back(res);
 				}
+				for(int i = 0; i < 4; i ++) {
+					if(i == m_doingPlayer) {
+						int xiaohu = 1;
+						if(dahu) {
+							xiaohu = 0;
+						}
+						m_playScore.add(i, ScoreArray[i], dahu, xiaohu, m_calScore.getZhaMa());
+					}
+					else {
+						m_playScore.add(i, ScoreArray[i], 0, 0, 0);
+					}
+				}
 			}
 			if(m_remain == 0) {
-				std::string strScore;
-				for(int i = 0; i < 4; i ++) {
-					if(i != 0) {
-						strScore += "|";
-					}
-					strScore += COMMON::convert<int,std::string>(m_allScore[i]);
-				}
+				std::string str;
+				m_playScore.toResp(str);
 				for(int i = 0; i < 4; i ++) {
 					Resp res;
 					res.m_uid = m_tablePlayers[i].m_player->m_account;
-					res.m_resp = "game:over|"+strScore;
+					res.m_resp = str;
 					resp.push_back(res);
 				}
 			}
@@ -1071,8 +1188,8 @@ Table::Table(const Player *player, const int type, const int &id, const int &pla
 	for(int i = 1; i < 4; i ++) {
 		m_status[i] = 0;
 		m_pStatus[i] = 0;
-		m_allScore[i] = 0;
 	}
+	m_playScore.init();
 	m_retCard = retCard;
 	
 	m_remain = planPlay;
@@ -1183,3 +1300,28 @@ int Table::Again(const std::string &uid) {
 	return 0;
 }
 
+int Table::inRoomPai(const std::string &uid, std::vector<Resp> &resp) {
+	for(int i = 0; i < 4; i ++) {
+		if(m_tablePlayers[i].m_player->m_account != uid) {
+			continue;
+		}
+		Resp res;
+		res.m_uid = m_tablePlayers[i].m_player->m_account;
+		for(int j = 0; j < 4; j ++) {
+			if(i == j) {
+				std::string Cards;
+				std::string Uid;
+				m_tablePlayers[i].GetCard(Uid, Cards);
+				res.m_resp = "game:pai|"+COMMON::convert<int,std::string>(j+1)+"|"+
+						COMMON::convert<int,std::string>(m_tablePlayers[j].m_playerCards.m_size)+"|"+
+						Cards;
+			}
+			else {
+				res.m_resp = "game:pai|"+COMMON::convert<int,std::string>(j+1)+"|"+
+						COMMON::convert<int,std::string>(m_tablePlayers[j].m_playerCards.m_size);
+			}
+			resp.push_back(res);
+		}
+	}
+	return 0;
+}

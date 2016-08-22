@@ -21,6 +21,52 @@ typedef int PlayStatus;
 #define MOPAI 256
 #define CHUPAI 512
 
+
+class PlayScore {
+public:
+	int m_Score[4];
+	int m_ZhaMa[4];
+	int m_Dahu[4];
+	int m_Xiaohu[4];
+public:
+	int toResp(std::string &str) {
+		str = "game:over";
+		for(int i = 0; i < 4; i ++) {
+			str += "|"+COMMON::convert<int, std::string>(m_Score[i]);
+		}
+		for(int i = 0; i < 4; i ++) {
+			str += "|"+COMMON::convert<int, std::string>(m_Dahu[i]);
+		}
+		for(int i = 0; i < 4; i ++) {
+			str += "|"+COMMON::convert<int, std::string>(m_Xiaohu[i]);
+		}
+		for(int i = 0; i < 4; i ++) {
+			str += "|"+COMMON::convert<int, std::string>(m_ZhaMa[i]);
+		}
+		return 0;
+	}
+	int init() {
+		for(int i = 0; i < 4; i ++) {
+			m_Score[i] = 0;
+			m_Dahu[i] = 0;
+			m_Xiaohu[i] = 0;
+			m_ZhaMa[i] = 0;
+		}
+		return 0;
+	}
+	int add(int idx, int score, int dahu, int xiaohu, int zhama) {
+		if(idx >= 4 || idx < 0) {
+			return -1;
+		}
+		m_Score[idx] += score;
+		m_Dahu[idx] += dahu;
+		m_Xiaohu[idx] += xiaohu;
+		m_ZhaMa[idx] += zhama;
+		return 0;
+	}
+};
+
+
 //玩家手牌
 class PlayerCards {
 public:
@@ -54,8 +100,8 @@ public:
 		//测试代码
 		{
 			memset(m_playCards, 0,sizeof(m_playCards));
-			for(int xx = 0; xx < 3; xx ++) {
-				m_playCards[xx] += 4;
+			for(int xx = 0; xx < 4; xx ++) {
+				m_playCards[xx] += 3;
 			}
 			m_playCards[7] = 1;
 			//memset(m_playCards, 0,sizeof(m_playCards));

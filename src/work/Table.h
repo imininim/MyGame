@@ -43,12 +43,13 @@ public:
 	CardSender *m_cardSender;	//发牌器
 	GamePlayWay m_playGame;	//游戏玩法
 	CalScore m_calScore;	//得分计算方法
-	int m_allScore[4];
+	PlayScore m_playScore;
 public:
 	Table(const Player *player, const int type, const int &id, const int &planPlay, const int &retCard);
 	~Table();
 public:
 	//玩家uid进行了 type操作 出了 card牌
+	int inRoomPai(const std::string &uid, std::vector<Resp> &resp);
 	int Again(const std::string &uid);
 	int PlayerOperator(const std::string &uid, const int &type, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
 	int BeginGame();

@@ -60,6 +60,15 @@ public:
 			Operator |= PENG;
 		}
 		//std::cerr << "OPT" << std::endl;
+		if(type == 0) {
+			for(int i = 0; i < 27; i ++) {
+				if(playerCards.m_playCards[i] > 0) {
+					if(m_alg->isGang(playerCards, type, i)) {
+						Operator |= GANG;
+					}
+				}
+			}
+		}
 		if(m_alg->isGang(playerCards, type, rpai)) {
 			//std::cerr << "GANG" << std::endl;
 			Operator |= GANG;

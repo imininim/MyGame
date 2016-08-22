@@ -161,7 +161,7 @@ int Game::OutRoom(const std::string &uid, const std::string &commands, std::vect
 				resp.push_back(res);
 			}
 		}
-		if(table->m_roomMan == 0) {
+		if(table->m_people == 0) {
 			if(GameConfig::debug > 1) {
 				std::cerr << "DestroyTable:" << table->m_id << std::endl;
 			}
@@ -405,7 +405,7 @@ int Game::Login(std::string &uid, const std::string &commands, std::vector<Resp>
 		const Player *player = onlinePlayer->GetPlayer(account);
 		ret = 0;
 		uid = account;
-		res.m_resp = "login:yes|"+COMMON::convert<int, std::string>(player->GetRoomCard());
+		res.m_resp = "login:yes|"+COMMON::convert<int, std::string>(player->GetRoomCard())+"|"+COMMON::convert<int, std::string>(player->m_id);
 	} while(0);
 	
 	if(ret == -1) {

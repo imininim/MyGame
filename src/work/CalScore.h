@@ -6,11 +6,26 @@
 
 class CalScore {
 public:
-	std::vector<Pai> m_retCardList;
+	int zhaMa;
+	//std::vector<Pai> m_retCardList;
 public:
-	int setCard(const std::vector<Pai> &retCardList) {
-		m_retCardList.clear();
-		m_retCardList = retCardList;
+	int getZhaMa() {
+		return zhaMa;
+	}
+	int addZhaMa(Pai pai, int idx, int zhuang) {
+		//pai %= 9;
+		//pai %= 4;
+		if((idx-zhuang+4)%4 == pai%4) {
+			zhaMa ++;
+		}
+		//if((pai-zhuang)%4 == idx) {
+		//	zhaMa ++;
+		//}
+	}
+	int init() {
+		//m_retCardList.clear();
+		//m_retCardList = retCardList;
+		zhaMa = 0;
 		return 0;
 	}
 	int GetScore(int type, int huIdx, int idx, int zhuang, int dahu) {
@@ -44,6 +59,9 @@ public:
 			}
 		}
 
+		for(int i = 0; i < zhaMa; i ++) {
+			Score *= 2;
+		}
 		return -Score;
 	}
 };
