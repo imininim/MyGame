@@ -143,11 +143,11 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			return 0;
 		}
 		//起手胡牌
-		/*{
-			m_tablePlayers[m_doingPlayer].toHu();
-			m_prePai = 9;
-			newCard = 7;
-		}*/
+		//{
+		//	m_tablePlayers[m_doingPlayer].toHu();
+		//	m_prePai = 9;
+		//	newCard = 7;
+		//}
 		newCard = PlayerCards::TransCard(newCard);
 		LOG_DEBUG("MOPAI Card %d", newCard);
 		m_tablePlayers[m_doingPlayer].addCard(newCard);
@@ -221,7 +221,7 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 		resp.push_back(res);
 	}
 	if(type & DAPAI) {
-		LOG_DEBUG("MOPAI Card %d", card);
+		LOG_DEBUG("DAPAI Card %d", card);
 		m_tablePlayers[m_doingPlayer].outCard(card);
 		PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
 		playerQueue->sub(m_tablePlayers[m_doingPlayer].m_player);
@@ -461,7 +461,6 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 		PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
 		playerQueue->sub(m_tablePlayers[m_doingPlayer].m_player);
 		LOG_DEBUG("GUO");
-		//m_doingPlayer = (m_doingPlayer+1)%4;
 		int OptArray[4] = {0,0,0,0};
 		int LevelArray[4] = {0,0,0,0};
 		int next = (m_prePlayer+1)%4;
@@ -776,7 +775,7 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 		int type = (m_tablePlayers[m_doingPlayer].m_playerCards.m_size%3 == 1);
 		int Operator = 0;
 		int dahu = 0;
-		m_playGame.Operator(m_tablePlayers[m_doingPlayer].m_playerCards, Operator, type, m_prePai, dahu);
+		m_playGame.Operator(m_tablePlayers[m_doingPlayer].m_playerCards, Operator, type, newCard, dahu);
 		if(Operator) {
 			res.m_uid = m_tablePlayers[m_doingPlayer].m_player->m_account;
 			res.m_resp = "game:choose";
@@ -834,9 +833,9 @@ int Table::PlayerOperator(const std::string &uid, const int &type, const int &ca
 			if(Operator&HU) {
 				res.m_resp += "|hu";
 			}
-			if(Operator&GANG) {
-				res.m_resp += "|gang";
-			}
+			//if(Operator&GANG) {
+			//	res.m_resp += "|gang";
+			//}
 			if(Operator&TIANHU) {
 				res.m_resp += "|tianhu";
 			}

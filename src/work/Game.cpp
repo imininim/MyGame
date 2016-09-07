@@ -210,6 +210,9 @@ int Game::InRoom(const std::string &uid, const std::string &commands, std::vecto
 				resp.push_back(res);
 			}
 		}
+		if(table->m_tableStatus) {
+			table->inRoomPai(uid, resp);
+		}
 		//table->GetPlayersID(players);
 		//std::vector<std::string> playerID;
 		//table->GetPlayersAccount(playerID);
@@ -275,7 +278,6 @@ int Game::doGame(std::string &uid, const std::string &commands, std::vector<Resp
 
 	if(GameConfig::debug > 1) {
 		std::cerr << "in DoGame uid = " << uid << " commands = " << commands << std::endl;
-
 	}
 	int pos = commands.find(":");
 	if(pos == std::string::npos) {
@@ -283,6 +285,9 @@ int Game::doGame(std::string &uid, const std::string &commands, std::vector<Resp
 	}
 	std::string command = commands.substr(pos+1);
 	std::string Opt = commands.substr(0, pos);
+	if(GameConfig::debug > 1) {
+		std::cerr << "command = " << command << " Opt = " << Opt << std::endl;
+	}
 	if(Opt == "reg") {
 		Game::Register(uid, command, resp);
 	}

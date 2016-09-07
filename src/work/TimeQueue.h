@@ -54,7 +54,7 @@ public:
 		std::tr1::unordered_map<const Player*, int>::iterator it;
 		//map<const Player*, int>::iterator it;
 		for(it = m_playerTimeMap.begin(); it != m_playerTimeMap.end(); it ++) {
-			if(it->second == 60) {
+			if(it->second >= 60) {
 				list.push_back((it->first)->m_account);
 			}
 		}

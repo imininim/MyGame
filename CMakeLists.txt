@@ -1,5 +1,5 @@
 PROJECT (HELLO)
-
+set(CMAKE_BUILD_TYPE Debug CACHE STRING "set build type to debug")
 ADD_SUBDIRECTORY(src bin)
 
 

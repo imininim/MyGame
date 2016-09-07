@@ -34,7 +34,7 @@ int TablePlayer::gangCard(Pai idx) {
 		m_playerCards.gangCard(PlayerCards::reTransCard(idx));
 	}
 	else {
-		m_playerCards.anGangCard(PlayerCards::reTransCard(idx));
+		m_playerCards.gangCard(PlayerCards::reTransCard(idx));
 	}
 	return 0;
 }

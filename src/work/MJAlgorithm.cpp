@@ -117,7 +117,7 @@ bool PingjiangMJ::isHu(const PlayerCards &playerCards, const int type, const Pai
 
 	do {
 		if(type == 1) {
-			Pai m_mj[30];
+			/*Pai m_mj[30];
 			Pai m_mjt[30];
 			int ret = 0;
 			memcpy(m_mjt, playerCards.m_playCards, sizeof(playerCards.m_playCards));
