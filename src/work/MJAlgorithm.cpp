@@ -2,6 +2,17 @@
 
 //int JIANG[] = {0,1,0,0,1,0,0,1,0, 0,1,0,0,1,0,0,1,0, 0,1,0,0,1,0,0,1,0};
 
+bool PingjiangMJ::isTianhu(const PlayerCards &playerCards, const int type, const Pai pai) {
+	for(int i = 0; i < 27; i ++) {
+		if(JIANG[i]) {
+			if(playerCards.m_playCards[i]) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 bool PingjiangMJ::isChi(const PlayerCards &playerCards, const int type, const Pai pai) {
 	if(type == 0) {
 		return false;
@@ -249,12 +260,12 @@ bool PingjiangMJ::isHu(const PlayerCards &playerCards, const int type, const Pai
 			int ret = 0;
 			for(int i = 0; i < 27; i ++) {
 				if(JIANG[i]) {
-					std::cerr << "jiang = " << i << std::endl;
+					//std::cerr << "jiang = " << i << std::endl;
 					memcpy(m_mj, playerCards.m_playCards, sizeof(playerCards.m_playCards));
 					ret = 0;
 					if(m_mj[i] >= 2) {
-						std::cerr << "i = " << i << std::endl;
-						std::cerr << "M_mj.size() = " << m_mj[i] << std::endl;
+						//std::cerr << "i = " << i << std::endl;
+						//std::cerr << "M_mj.size() = " << m_mj[i] << std::endl;
 						ret += playerCards.m_playCardsPeng.size();
 						ret += playerCards.m_playCardsGang.size();
 						ret += playerCards.m_playCardsAnGang.size();
@@ -430,7 +441,7 @@ bool PingjiangMJ::oneColer(const PlayerCards &playerCards, const int type, const
 
 		int ret = 0;
 		for(int i = 0; i < 27; i ++) {
-			if(JIANG[i]) {
+			//if(JIANG[i]) {
 				memcpy(m_mj, m_mjt, sizeof(m_mjt));
 				ret = 0;
 				if(m_mj[i] >= 2) {
@@ -443,7 +454,7 @@ bool PingjiangMJ::oneColer(const PlayerCards &playerCards, const int type, const
 						return true;
 					}
 				}
-			}
+			//}
 		}
 	}
 

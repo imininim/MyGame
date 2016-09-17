@@ -3,11 +3,14 @@
 using namespace std;
 
 int MySQLManager::insert(const std::string &sql) {
+	initConnection();
 	if(!m_isConnected) {
+		destroyConnection();
 		std::cerr << "MYSQL No Connected" << std::endl;
 		return RUN_ERR;
 	}
 	if(sql.empty()) {
+		destroyConnection();
 		std::cerr << "sql error:" << sql << std::endl;
 		return RUN_ERR;
 	}
@@ -15,20 +18,24 @@ int MySQLManager::insert(const std::string &sql) {
 	MYSQL_ROW row;
 	int ret = mysql_query(&m_mySQLClient, sql.c_str());
 	if(ret < 0) {
+		destroyConnection();
 		std::cerr << "Error Query: " << mysql_error(&m_mySQLClient) << std::endl;
 		return RUN_ERR;
 	}
-	std::cerr << "sql = " << sql << std::endl;
+	destroyConnection();
 	return ret;
 }
 
 int MySQLManager::select(const std::string &sql, std::vector<std::vector<std::string> > &result) {
+	initConnection();
 	if(!m_isConnected) {
 		std::cerr << "MYSQL No Connected" << std::endl;
+		destroyConnection();
 		return RUN_ERR;
 	}
 	if(sql.empty()) {
 		std::cerr << "sql error:" << sql << std::endl;
+		destroyConnection();
 		return RUN_ERR;
 	}
 	MYSQL_RES *res;
@@ -36,10 +43,16 @@ int MySQLManager::select(const std::string &sql, std::vector<std::vector<std::st
 	int ret = mysql_query(&m_mySQLClient, sql.c_str());
 	if(ret < 0) {
 		std::cerr << "Error Query: " << mysql_error(&m_mySQLClient) << std::endl;
+		destroyConnection();
 		return RUN_ERR;
 	}
 	std::vector<std::string> vrow;
 	res = mysql_use_result(&m_mySQLClient);
+	if(res == NULL) {
+		std::cerr << "Error Query: " << mysql_error(&m_mySQLClient) << std::endl;
+		destroyConnection();
+		return RUN_ERR;
+	}
 	while((row = mysql_fetch_row(res))) {
 		for(int i = 0; i < res->field_count; i ++) {
 			vrow.push_back(row[i]);
@@ -48,6 +61,7 @@ int MySQLManager::select(const std::string &sql, std::vector<std::vector<std::st
 	}
 
 	mysql_free_result(res);
+	destroyConnection();
 	return RUN_OK;
 }
 

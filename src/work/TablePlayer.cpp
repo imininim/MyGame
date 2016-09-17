@@ -1,10 +1,11 @@
 #include "TablePlayer.h"
 
 int TablePlayer::init() {
+	m_status = 0;
+	m_pai = -1;
+	m_zhama.clear();
 	return m_playerCards.init();
 }
-
-
 
 int TablePlayer::chiCard(Pai idx, Pai card1, Pai card2) {
 	return m_playerCards.chiCard(PlayerCards::reTransCard(idx), PlayerCards::reTransCard(card1), PlayerCards::reTransCard(card2));

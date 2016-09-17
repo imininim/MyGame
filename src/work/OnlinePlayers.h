@@ -62,6 +62,7 @@ public:
 		Clear();
 		pthread_mutex_destroy(&m_mutex);
 	}
+	int InsertPlayer(const Player *player);
 private:
 	int Register_Unlock(const std::string &Account, const std::string &Passwd, const std::string Name);
 	OnlinePlayers(const std::string &db_addr, const std::string &db_user, const std::string &db_passwd, const std::string &db_name):

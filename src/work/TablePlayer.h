@@ -6,10 +6,14 @@
 
 class TablePlayer {
 public:
-	const Player *m_player;
-	PlayerCards m_playerCards;
-	int m_Operator;
-	Pai m_pai;
+	const Player *m_player;		//玩家
+	PlayerCards m_playerCards;	//玩家手牌
+	int m_status;				//玩家状态 0.正常  1.挂机  2.胡牌
+	int m_huStats;				//胡牌状态 0.放炮  1.自摸
+	int m_dahu;					//大胡状态 
+
+	std::vector<Pai> m_zhama;
+	Pai m_pai;					//上一张摸的牌
 public:
 	TablePlayer(const Player *player) {
 		m_player = player;

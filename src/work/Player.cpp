@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "OnlinePlayers.h"
 
 Player::Player(const std::vector<std::string> &Info) {
 	m_account = Info[0];
@@ -8,6 +9,29 @@ Player::Player(const std::vector<std::string> &Info) {
 	m_PlayNum = COMMON::convert<std::string, int>(Info[4]);
 	m_id = COMMON::convert<std::string, int>(Info[5]);
 	m_score = COMMON::convert<std::string, int>(Info[6]);
+}
+
+int Player::changeScore(int score) {
+	m_score += score;
+	
+	OnlinePlayers *onlinePlayers = OnlinePlayers::getOnlinePlayers();
+	onlinePlayers->InsertPlayer(this);
+	return 0;
+}
+
+int Player::addPlayNum() {
+	m_PlayNum ++;
+	OnlinePlayers *onlinePlayers = OnlinePlayers::getOnlinePlayers();
+	onlinePlayers->InsertPlayer(this);
+	return 0;
+}
+
+int Player::subRoomCard(int idx) {
+	m_roomCard -= idx;
+	
+	OnlinePlayers *onlinePlayers = OnlinePlayers::getOnlinePlayers();
+	onlinePlayers->InsertPlayer(this);
+	return 0;
 }
 
 void Player::show() const {

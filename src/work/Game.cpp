@@ -52,7 +52,12 @@ int Game::PlayGame(const std::string &uid, const std::string &commands, std::vec
 			}
 		}
 		if(Info[0] == "th") {
-			type |= 1;
+			if(Info[1] == "hu") {
+				type |= 1;
+			}
+			else if(Info[1] == "fanpai") {
+				type |= TIANHUMOPAI;
+			}
 		}
 		else if(Info[0] == "chi") {
 			type |= 2;
@@ -116,19 +121,9 @@ int Game::Begin(const std::string &uid, const std::string &commands, std::vector
 		LOG_ERROR("table id error:%s", uid.c_str());
 		return -1;
 	}
-	if(table->BeginGame() == -1) {
+	if(table->BeginGame(uid, resp) == -1) {
 		return -1;
 	}
-	Resp res;
-	for(int i = 0; i < 4; i ++) {
-		table->GetAllCards(i, res.m_uid, res.m_resp);
-		resp.push_back(res);
-	}
-
-	int zhuang = table->m_zhuang;
-	std::string zid = table->m_tablePlayers[zhuang].m_player->m_account;
-
-	table->PlayerOperator(zid, MOPAI, 0, 0, 0, resp);
 
 	return 0;
 }
@@ -162,6 +157,7 @@ int Game::OutRoom(const std::string &uid, const std::string &commands, std::vect
 			}
 		}
 		if(table->m_people == 0) {
+			std::cerr << "people = " << table->m_people << std::endl;
 			if(GameConfig::debug > 1) {
 				std::cerr << "DestroyTable:" << table->m_id << std::endl;
 			}
@@ -448,7 +444,7 @@ int Game::Logout(const std::string &uid, const std::string &commands, std::vecto
 				resp.push_back(res);
 			}
 		}
-		if(table->m_roomMan == 0) {
+		if(table->m_people == 0) {
 			if(GameConfig::debug > 1) {
 				std::cerr << "DestroyTable:" << table->m_id << std::endl;
 			}

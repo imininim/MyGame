@@ -18,7 +18,7 @@
 class Table {
 public:
 	int m_id;			//牌桌id
-	
+
 	int m_tableType;			//属于什么游戏
 	std::vector<TablePlayer> m_tablePlayer;	//牌桌上的玩家
 	int m_roomMan;		//房主
@@ -38,7 +38,11 @@ public:
 
 	int m_doingPlayer;	//正在执行操作的玩家
 	int m_prePlayer;		//上一个打牌玩家
-	int m_level;			//当前优先级 10.天胡  9.胡牌  8.杠 7.碰  6.吃 
+	int m_level;			//当前优先级 10.天胡  9.胡牌  8.杠 7.碰  6.吃
+	int m_end;			//结算
+	int m_endStatus;	//结算状态  0.臭庄 1.胡牌
+	int m_ScoreArray[4];	//得分
+
 	Pai m_prePai;			//上一张打出的牌
 	CardSender *m_cardSender;	//发牌器
 	GamePlayWay m_playGame;	//游戏玩法
@@ -52,12 +56,25 @@ public:
 	int inRoomPai(const std::string &uid, std::vector<Resp> &resp);
 	int Again(const std::string &uid);
 	int PlayerOperator(const std::string &uid, const int &type, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
-	int BeginGame();
+	int BeginGame(const std::string &uid, std::vector<Resp> &resp);
 	int GetPlayersID(std::string &players);
 	int GetPlayersAccount(std::vector<std::string> &playersID);
 	int InRoom(const Player *player);
 	int OutRoom(const Player *player);
 	int toClient(std::tr1::unordered_map<std::string, std::string> &playersOp);
+
+	int TianHu(const std::string &uid, std::vector<Resp> &resp);
+	int TianHuMoPai(const std::string &uid, std::vector<Resp> &resp);
+	int JieSuan(std::vector<Resp> &resp);		//ok
+	int MoPai(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);	//ok
+	int Gang(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
+	int Peng(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
+	int Hu(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
+	int Chi(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
+	int Guaji(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
+	int ChuPai(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
+	int KaiGang(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
+	int Guo(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
 
 	int toResp(const int &id, std::string &uid, std::string &resp);
 	int toRespAgain(const int &id, std::string &uid, std::string &resp);

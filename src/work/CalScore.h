@@ -15,17 +15,12 @@ public:
 	int addZhaMa(Pai pai, int idx, int zhuang) {
 		//pai %= 9;
 		//pai %= 4;
-		std::cerr << "idx = " << idx << " zhuang = " << zhuang << " pai = " << pai << std::endl;
+		//std::cerr << "idx = " << idx << " zhuang = " << zhuang << " pai = " << pai << std::endl;
 		if((idx-zhuang+4)%4 == (pai%9)%4) {
 			zhaMa ++;
 		}
-		//if((pai-zhuang)%4 == idx) {
-		//	zhaMa ++;
-		//}
 	}
 	int init() {
-		//m_retCardList.clear();
-		//m_retCardList = retCardList;
 		zhaMa = 0;
 		return 0;
 	}
@@ -39,7 +34,10 @@ public:
 				Score += 1;
 			}
 			if(dahu) {
-				Score += 3*dahu;
+				Score += 3;
+				while(-- dahu > 0) {
+					Score *= 2;
+				}
 			}
 			else {
 				Score += 1;
@@ -53,7 +51,10 @@ public:
 				Score += 1;
 			}
 			if(dahu) {
-				Score += 6*dahu;
+				Score += 6;
+				while(-- dahu > 0) {
+					Score *= 2;
+				}
 			}
 			else {
 				Score += 1;

@@ -14,18 +14,9 @@ public:
 	int GetRoomCard() const {
 		return m_roomCard;
 	}
-	int subRoomCard(int idx) {
-		m_roomCard -= idx;
-		return 0;
-	}
-	int addPlayNum() {
-		m_PlayNum ++;
-		return 0;
-	}
-	int changeScore(int score) {
-		m_score += score;
-		return 0;
-	}
+	int subRoomCard(int idx);
+	int addPlayNum();
+	int changeScore(int score);
 	int toSQL(std::string &sql) const {
 		sql = "update Player set roomCard = "+COMMON::convert<int, std::string>(m_roomCard)+
 		", playNum = "+COMMON::convert<int, std::string>(m_PlayNum)+

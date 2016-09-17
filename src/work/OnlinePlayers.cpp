@@ -271,6 +271,14 @@ int OnlinePlayers::Logout(const std::string &Account, int &id) {
 	return ret;
 }
 
+int OnlinePlayers::InsertPlayer(const Player *player) {
+	std::string sql;
+	player->toSQL(sql);
+	m_mysql.insert(sql);
+	std::cerr << "write player" << std::endl;
+	return 0;
+}
+
 int OnlinePlayers::show() const {
 	//for(std::tr1::unordered_map<std::string, const Player*>::const_iterator it = m_onlinePlayMap.begin(); it != m_onlinePlayMap.end(); it ++) {
 	//	(it->second)->show();

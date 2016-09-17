@@ -1,5 +1,6 @@
 PROJECT (HELLO)
-set(CMAKE_BUILD_TYPE Debug CACHE STRING "set build type to debug")
+#set(CMAKE_BUILD_TYPE Debug CACHE STRING "set build type to debug")
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS}  -g -ggdb")
 ADD_SUBDIRECTORY(src bin)
 
 

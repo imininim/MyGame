@@ -20,7 +20,10 @@ typedef int PlayStatus;
 #define GUAJI 128
 #define MOPAI 256
 #define CHUPAI 512
-
+#define ANGANG 1024
+#define TIANHUMOPAI 2048
+#define LAOYUE 4096
+#define KAIGANG 8192
 
 class PlayScore {
 public:
@@ -62,6 +65,7 @@ public:
 		m_Dahu[idx] += dahu;
 		m_Xiaohu[idx] += xiaohu;
 		m_ZhaMa[idx] += zhama;
+		std::cerr << "dahu" << dahu << "  xiaohu = " << xiaohu << " zhama = " << zhama << std::endl;
 		return 0;
 	}
 };
