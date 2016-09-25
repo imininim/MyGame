@@ -70,7 +70,7 @@ int OnlinePlayers::CreateTable(const std::string &Account, int &id, const int &p
 			break;
 		}
 		const Player *player = m_onlinePlayMap[Account];
-		int needRooms = planPlay/8;
+		int needRooms = planPlay/6;
 		if(player->GetRoomCard() < needRooms) {
 			break;
 		}
@@ -275,7 +275,7 @@ int OnlinePlayers::InsertPlayer(const Player *player) {
 	std::string sql;
 	player->toSQL(sql);
 	m_mysql.insert(sql);
-	std::cerr << "write player" << std::endl;
+	std::cerr << "write player  " << sql << std::endl;
 	return 0;
 }
 

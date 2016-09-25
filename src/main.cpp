@@ -33,10 +33,10 @@ struct CMyFrame: public CFrame
 		m_pServer->AddSignal(20, (void*)buf); // ctrl-z 信号
 		m_pServer->SetDeadCheck(300);
 			
-		struct	timeval  ti = {1, 0};  //3秒一次的定时器
-		//struct	timeval  ti2 = {3, 0};  //1秒一次的定时器
+		struct	timeval  ti = {1, 0};  //1秒一次的定时器
+		struct	timeval  ti2 = {30, 0};  //30秒一次的定时器
 		m_pServer->SetTimer(100, ti, (void*)buf1);
-		//m_pServer->SetTimer(103, ti2, (void*)buf3);
+		m_pServer->SetTimer(101, ti2, (void*)buf1);
 
 		return true;
 	
@@ -51,10 +51,8 @@ struct CMyFrame: public CFrame
 	{
 		m_handles.clear(); //释放所有的客户端连接
 
-		m_pServer->FreeSignal(20); //释放信号
-
 		m_pServer->KillTimer(100);//释放定时器
-		m_pServer->KillTimer(103);
+		m_pServer->KillTimer(101);//释放定时器
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -327,6 +325,10 @@ struct CMyFrame: public CFrame
 					}
 				}
 			}
+		}
+		if(pEventHandle->GetEventId() == 101) {
+			PlayerQueue *playerQueue = PlayerQueue::getPlayerQueue();
+			playerQueue->ClearTable();
 		}
 	}
 	std::set<iTCPHandlePtr> m_handles;

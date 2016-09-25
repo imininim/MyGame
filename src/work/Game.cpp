@@ -51,13 +51,11 @@ int Game::PlayGame(const std::string &uid, const std::string &commands, std::vec
 				return 0;
 			}
 		}
-		if(Info[0] == "th") {
-			if(Info[1] == "hu") {
-				type |= 1;
-			}
-			else if(Info[1] == "fanpai") {
-				type |= TIANHUMOPAI;
-			}
+		if(Info[0] == "tianhu") {
+			type |= 1;
+		}
+		else if(Info[0] == "fanpai") {
+			type |= TIANHUMOPAI;
 		}
 		else if(Info[0] == "chi") {
 			type |= 2;
@@ -79,6 +77,15 @@ int Game::PlayGame(const std::string &uid, const std::string &commands, std::vec
 		}
 		else if(Info[0] == "guaji") {
 			type |= 128;
+		}
+		else if(Info[0] == "laoyue") {
+			type |= LAOYUE;
+		}
+		else if(Info[0] == "kaigang") {
+			type |= KAIGANG;
+		}
+		else if(Info[0] == "buzhang") {
+			type |= BUZHANG;
 		}
 		
 		/*if(card < 0) {

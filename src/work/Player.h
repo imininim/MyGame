@@ -21,8 +21,8 @@ public:
 		sql = "update Player set roomCard = "+COMMON::convert<int, std::string>(m_roomCard)+
 		", playNum = "+COMMON::convert<int, std::string>(m_PlayNum)+
 		", score = "+COMMON::convert<int, std::string>(m_score)+
-		", name = "+m_name+
-		" where id = "+COMMON::convert<int, std::string>(m_id)+";";
+		", name = '"+m_name+
+		"' where id = '"+COMMON::convert<int, std::string>(m_id)+"';";
 	}
 	int setName(const std::string &Name) {
 		m_name = Name;

@@ -32,6 +32,10 @@ public:
 	int m_tableStatus;	//牌桌状态 0.等人 1.游戏中
 	int m_zhuang;		//庄家
 	int m_people;		//人数
+
+	int m_online[4];	//在线玩家
+
+	int m_laoyue;		//是不是在捞月
 	
 	int m_pStatus[4];	//游玩状态
 	int m_pPeople;		//准备人数
@@ -67,6 +71,7 @@ public:
 	int TianHuMoPai(const std::string &uid, std::vector<Resp> &resp);
 	int JieSuan(std::vector<Resp> &resp);		//ok
 	int MoPai(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);	//ok
+	int Laoyue(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);	//ok
 	int Gang(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
 	int Peng(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);
 	int Hu(const std::string &uid, const int &card, const int &card2, const int &card3, std::vector<Resp> &resp);

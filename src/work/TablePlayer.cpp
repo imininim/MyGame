@@ -4,6 +4,7 @@ int TablePlayer::init() {
 	m_status = 0;
 	m_pai = -1;
 	m_zhama.clear();
+	m_kaiGang = 0;
 	return m_playerCards.init();
 }
 

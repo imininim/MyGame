@@ -15,6 +15,7 @@ public:
 	virtual bool isNull()=0;
 	virtual int getZhaMa()=0;
 	virtual Pai getJiang()=0;
+	virtual void insertPai(const Pai &pai)=0;
 };
 
 //发牌器
@@ -42,7 +43,8 @@ public:
 		for(int i = 0; i < 30; i ++) {
 			m_card[i] = 4;
 		}
-		m_p = 108;
+		//m_p = 108;
+		m_p = 55;
 		m_p -= m_retCard;
 	}
 
@@ -59,6 +61,10 @@ public:
 		m_card[pai] --;
 		m_p --;
 		return pai;
+	}
+	virtual void insertPai(const Pai &pai) {
+		m_card[pai] ++;
+		m_p ++;
 	}
 	virtual Pai getJiang() {
 		if(m_p == 0) {

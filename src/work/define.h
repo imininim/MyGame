@@ -24,6 +24,7 @@ typedef int PlayStatus;
 #define TIANHUMOPAI 2048
 #define LAOYUE 4096
 #define KAIGANG 8192
+#define BUZHANG 16384
 
 class PlayScore {
 public:
@@ -104,6 +105,16 @@ public:
 		//测试代码
 		{
 			memset(m_playCards, 0,sizeof(m_playCards));
+			//int x = 0;
+			//for(int i = 0; i < 25; i ++) {
+			//	if((i%9) != 1 && (i%9) != 4 && (i%9) != 7) {
+			//		m_playCards[i] = 1;
+			//		x ++;
+			//	}
+			//	if(x == 13) {
+			//		break;
+			//	}
+			//}
 			for(int xx = 0; xx < 4; xx ++) {
 				m_playCards[xx] += 3;
 			}

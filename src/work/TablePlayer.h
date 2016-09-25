@@ -11,6 +11,7 @@ public:
 	int m_status;				//玩家状态 0.正常  1.挂机  2.胡牌
 	int m_huStats;				//胡牌状态 0.放炮  1.自摸
 	int m_dahu;					//大胡状态 
+	int m_kaiGang;				//开杠
 
 	std::vector<Pai> m_zhama;
 	Pai m_pai;					//上一张摸的牌

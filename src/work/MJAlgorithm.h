@@ -50,6 +50,21 @@ public:
 		m_alg = new PingjiangMJ();
 	}
 public:
+	int isTingPai(const PlayerCards &playerCards, int &Operator, const int type, const Pai pai) {
+		if(type) {
+			for(int i = 0; i < 27; i ++) {
+				PlayerCards tmp = playerCards;
+				tmp.addCard(i);
+				int dahu;
+				std::cerr << "play size = " << tmp.m_size << std::endl;
+				if(m_alg->isHu(tmp, 0, 0, dahu)) {
+					Operator |= HU;
+					return 0;
+				}
+			}
+		}
+		return 0;
+	}
 	int Operator(const PlayerCards &playerCards, int &Operator, const int type, const Pai pai, int &dahu) {
 		int rpai = PlayerCards::reTransCard(pai);
 		std::cerr << "rpai = " << rpai << std::endl;
